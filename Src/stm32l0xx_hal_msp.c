@@ -21,43 +21,8 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-/* USER CODE BEGIN Includes */
+#include "board.h"
 
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN TD */
-
-/* USER CODE END TD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN Define */
- 
-/* USER CODE END Define */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN Macro */
-
-/* USER CODE END Macro */
-
-/* Private variables ---------------------------------------------------------*/
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
-/* USER CODE BEGIN PFP */
-
-/* USER CODE END PFP */
-
-/* External functions --------------------------------------------------------*/
-/* USER CODE BEGIN ExternalFunctions */
-
-/* USER CODE END ExternalFunctions */
-
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
 /**
   * Initializes the Global MSP.
   */
@@ -72,9 +37,6 @@ void HAL_MspInit(void)
 
   /* System interrupt init*/
 
-  /* USER CODE BEGIN MspInit 1 */
-
-  /* USER CODE END MspInit 1 */
 }
 
 /**
@@ -149,9 +111,6 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   if(hi2c->Instance==I2C1)
   {
-  /* USER CODE BEGIN I2C1_MspInit 0 */
-
-  /* USER CODE END I2C1_MspInit 0 */
   
     __HAL_RCC_GPIOB_CLK_ENABLE();
     /**I2C1 GPIO Configuration    
@@ -160,16 +119,13 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c)
     */
     GPIO_InitStruct.Pin = GPIO_PIN_9|GPIO_PIN_8;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Pull = GPIO_NOPULL; //GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM; //GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF4_I2C1;
     HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
     /* Peripheral clock enable */
     __HAL_RCC_I2C1_CLK_ENABLE();
-  /* USER CODE BEGIN I2C1_MspInit 1 */
-
-  /* USER CODE END I2C1_MspInit 1 */
   }
 
 }
@@ -352,16 +308,21 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     PA10     ------> USART1_RX
     PA9     ------> USART1_TX 
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_9;
+    /**USART1 GPIO Configuration
+      PB6     ------> USART1_TX
+      PB7     ------> USART1_RX
+      */
+    //GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_9;    // PA9 e PA10
+    GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7;       // PB6 e PB7
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF4_USART1;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+    //GPIO_InitStruct.Alternate = GPIO_AF4_USART1;     // PA9 e PA10
+    GPIO_InitStruct.Alternate = GPIO_AF0_USART1;       // PB6 e PB7
+    //HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);          // PA9 e PA10
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);            // PB6 e PB7
 
   /* USER CODE BEGIN USART1_MspInit 1 */
-  HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(USART1_IRQn);
 
   /* USER CODE END USART1_MspInit 1 */
   }
@@ -391,7 +352,6 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_10|GPIO_PIN_9);
 
   /* USER CODE BEGIN USART1_MspDeInit 1 */
-    HAL_NVIC_DisableIRQ(USART1_IRQn);
 
   /* USER CODE END USART1_MspDeInit 1 */
   }

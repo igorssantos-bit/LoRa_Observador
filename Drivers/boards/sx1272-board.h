@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #ifndef __SX1272_BOARD_H__
 #define __SX1272_BOARD_H__
 
@@ -164,3 +165,4 @@ void SX1272DbgPinRxWrite( uint8_t state );
 extern SX1272_t SX1272;
 
 #endif // __SX1272_BOARD_H__
+#endif

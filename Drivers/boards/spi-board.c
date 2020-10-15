@@ -70,7 +70,7 @@ void SpiInit( Spi_t *obj, SpiId_t spiId, PinNames mosi, PinNames miso, PinNames 
     {
         SpiFormat( obj, SPI_DATASIZE_8BIT, SPI_POLARITY_LOW, SPI_PHASE_1EDGE, 1 );
     }
-    SpiFrequency( obj, 10000000 );
+    SpiFrequency( obj, 10000000 ); // 10MHz
 
     HAL_SPI_Init( &SpiHandle[spiId] );
 

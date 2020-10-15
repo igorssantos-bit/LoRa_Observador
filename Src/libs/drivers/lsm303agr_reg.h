@@ -1,3 +1,30 @@
+/*!
+ * \file      lsm303agr_reg.h
+ *
+ * \brief     This file contains all the functions prototypes for the
+ *            lsm303agr_reg.c driver.
+ *
+ * \copyright 2019 Sigmais.
+ *  All rights reserved.
+ *
+ * \code
+ *				 _____ _                       _
+ *				/  ___(_)                     (_)
+ *				\ `--. _  __ _ _ __ ___   __ _ _ ___
+ *				 `--. \ |/ _` | '_ ` _ \ / _` | / __|
+ *				/\__/ / | (_| | | | | | | (_| | \__ \
+ *				\____/|_|\__, |_| |_| |_|\__,_|_|___/
+ *						  __/ | (C)2018-2020 Sigmais
+ *						 |___/
+ *
+ * \endcode
+ *
+ * \author    Marcelo Souza Fassarella ( EBM )
+ *
+ * This software component is a Sigmais property.
+ * You may not use this file except previously authorized by Sigmais.
+ *
+ */
 /*
  ******************************************************************************
  * @file    lsm303agr_reg.h
@@ -34,6 +61,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  *
  */
+
+
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef LSM303AGR_REGS_H
 #define LSM303AGR_REGS_H
@@ -657,7 +686,8 @@ int32_t lsm303agr_xl_filter_reference_set(lsm303agr_ctx_t *ctx,
 int32_t lsm303agr_xl_filter_reference_get(lsm303agr_ctx_t *ctx,
                                           uint8_t *buff);
 
-int32_t lsm303agr_xl_data_ready_get(lsm303agr_ctx_t *ctx, uint8_t *val);
+int32_t lsm303agr_xl_data_ready_get(lsm303agr_ctx_t *ctx,
+		                            uint8_t *val);
 
 int32_t lsm303agr_xl_data_ovr_get(lsm303agr_ctx_t *ctx, uint8_t *val);
 
@@ -988,6 +1018,17 @@ int32_t lsm303agr_mag_i2c_interface_set(lsm303agr_ctx_t *ctx,
                                         lsm303agr_i2c_dis_m_t val);
 int32_t lsm303agr_mag_i2c_interface_get(lsm303agr_ctx_t *ctx,
                                         lsm303agr_i2c_dis_m_t *val);
+
+
+
+/*************************************************************************************************/
+/*    Low Level Functions                                                                                */
+/*************************************************************************************************/
+
+int32_t accel_write(void *handle, uint8_t reg, uint8_t *buff, uint16_t len);
+int32_t accel_read(void *handle, uint8_t reg, uint8_t *buff, uint16_t len);
+int32_t magnet_write(void *handle, uint8_t reg, uint8_t *buff, uint16_t len);
+int32_t magnet_read(void *handle, uint8_t reg, uint8_t *buff, uint16_t len);
 
 /**
   * @}

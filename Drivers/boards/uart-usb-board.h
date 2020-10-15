@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #ifndef __UART_USB_BOARD_H__
 #define __UART_USB_BOARD_H__
 
@@ -91,3 +92,4 @@ uint8_t UartUsbPutChar( Uart_t *obj, uint8_t data );
 uint8_t UartUsbGetChar( Uart_t *obj, uint8_t *data );
 
 #endif // __UART_USB_BOARD_H__
+#endif

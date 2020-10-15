@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #ifndef __GPS_H__
 #define __GPS_H__
 
@@ -151,3 +152,4 @@ void GpsFormatGpsData( void );
 void GpsResetPosition( void );
 
 #endif // __GPS_H__
+#endif

@@ -19,6 +19,7 @@
 
 //#include "libs_firmware_config.h"
 #include "system_timer.h"
+#include "libs/services/debug.h"
 
 
 /*************************************************************************************************/
@@ -107,7 +108,8 @@ void fnTIMER_System_Tick ( void ) {
 
 /* Update Timers */
    fnTIMER_Update_Counters();
-
+   //if ((x_system_tick_counter %5000) == 0)
+   //   fnDEBUG_Const_String("timer ");
    return;
 
 }

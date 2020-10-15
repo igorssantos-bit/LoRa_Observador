@@ -78,7 +78,7 @@
 /*!
  * Maximum number of times the MAC layer tries to get an acknowledge.
  */
-#define MAX_ACK_RETRIES                             8
+#define MAX_ACK_RETRIES                             1 //8
 
 /*!
  * Frame direction definition for up-link communications
@@ -2668,6 +2668,9 @@ LoRaMacStatus_t LoRaMacMlmeRequest( MlmeReq_t* mlmeRequest );
  */
 LoRaMacStatus_t LoRaMacMcpsRequest( McpsReq_t* mcpsRequest );
 
+//TODO: verifiar se pode continuar aqui.
+void ResetMacParameters( void );
+void ProcessRadioTxTimeout( void );
 /*!
  * Automatically add the Region.h file at the end of LoRaMac.h file.
  * This is required because Region.h uses definitions from LoRaMac.h

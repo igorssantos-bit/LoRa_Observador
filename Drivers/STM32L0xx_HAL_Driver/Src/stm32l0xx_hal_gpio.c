@@ -110,6 +110,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l0xx_hal.h"
 #include "system_flags.h"
+#include "debug.h"
 
 /** @addtogroup STM32L0xx_HAL_Driver
   * @{
@@ -486,15 +487,23 @@ HAL_StatusTypeDef HAL_GPIO_LockPin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
   */
 void HAL_GPIO_EXTI_IRQHandler(uint16_t GPIO_Pin)
 {
-  /* EXTI line interrupt detected */
-  if(__HAL_GPIO_EXTI_GET_IT(GPIO_Pin) != RESET) 
-  { 
-    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_Pin);
-    HAL_GPIO_EXTI_Callback(GPIO_Pin);
-    un_system_flags.flag.fxos_1_int_threshold = true;
-    //un_system_flags.flag.fxos_1_int_data_ready = true;
 
-  }
+	if(__HAL_GPIO_EXTI_GET_IT(GPIO_Pin) != RESET)
+	{
+		__HAL_GPIO_EXTI_CLEAR_IT(GPIO_Pin);
+		HAL_GPIO_EXTI_Callback(GPIO_Pin);
+		//fnDEBUG_Const_String("############### CLEAR EXTI   ###############\r\n");
+		//un_system_flags.flag.fxos_1_int_data_ready = true;
+		//   un_system_flags.flag.fxos_1_int_threshold = true;
+	}
+
+	/* EXTI line interrupt detected */
+	/*
+	if (GPIO_Pin == GPIO_PIN_0){
+		fnDEBUG_Const_String("INT GPIO0 \r\n");
+	}
+
+	*/
 }
 
 /**

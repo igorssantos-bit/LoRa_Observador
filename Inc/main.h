@@ -30,78 +30,26 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32l0xx_hal.h"
 
+
+
+//I2C_HandleTypeDef hi2c1;
+//UART_HandleTypeDef huart1;
+//ADC_HandleTypeDef hadc;
+
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-//void MX_GPIO_Init(void);
-//void MX_ADC_Init(void);
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
-
 /* USER CODE END ET */
 
-/* Exported constants --------------------------------------------------------*/
-/* USER CODE BEGIN EC */
-
-/* USER CODE END EC */
-
-/* Exported macro ------------------------------------------------------------*/
-/* USER CODE BEGIN EM */
-
-/* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
-/* USER CODE BEGIN EFP */
-
-/* USER CODE END EFP */
-
-/* Private defines -----------------------------------------------------------*/
-#define PA15_RESERVED_Pin GPIO_PIN_15
-#define PA15_RESERVED_GPIO_Port GPIOA
-#define RADIO_SCLK_Pin GPIO_PIN_3
-#define RADIO_SCLK_GPIO_Port GPIOB
-#define LED1_Pin GPIO_PIN_5
-#define LED1_GPIO_Port GPIOB
-#define PA12_RESERVED_Pin GPIO_PIN_12
-#define PA12_RESERVED_GPIO_Port GPIOA
-#define PB4_RESERVED_Pin GPIO_PIN_4
-#define PB4_RESERVED_GPIO_Port GPIOB
-#define PB4_RESERVED_EXTI_IRQn EXTI4_15_IRQn
-#define PC13_RESERVED_Pin GPIO_PIN_13
-#define PC13_RESERVED_GPIO_Port GPIOC
-#define PC13_RESERVED_EXTI_IRQn EXTI4_15_IRQn
-#define PC1_RESERVED_Pin GPIO_PIN_1
-#define PC1_RESERVED_GPIO_Port GPIOC
-#define PC0_RESERVED_Pin GPIO_PIN_0
-#define PC0_RESERVED_GPIO_Port GPIOC
-#define PB1_RESERVED_Pin GPIO_PIN_1
-#define PB1_RESERVED_GPIO_Port GPIOB
-#define PB1_RESERVED_EXTI_IRQn EXTI0_1_IRQn
-#define EXTI2_MAGNET_Pin GPIO_PIN_2
-#define EXTI2_MAGNET_GPIO_Port GPIOB
-#define EXTI2_MAGNET_EXTI_IRQn EXTI2_3_IRQn
-#define PA1_RESERVED_Pin GPIO_PIN_1
-#define PA1_RESERVED_GPIO_Port GPIOA
-#define PC2_RESERVED_Pin GPIO_PIN_2
-#define PC2_RESERVED_GPIO_Port GPIOC
-#define RADIO_MOSI_Pin GPIO_PIN_7
-#define RADIO_MOSI_GPIO_Port GPIOA
-#define STLINK_RX_Pin GPIO_PIN_2
-#define STLINK_RX_GPIO_Port GPIOA
-#define PB0_RESERVED_Pin GPIO_PIN_0
-#define PB0_RESERVED_GPIO_Port GPIOB
-#define PB0_RESERVED_EXTI_IRQn EXTI0_1_IRQn
-#define RADIO_MISO_Pin GPIO_PIN_6
-#define RADIO_MISO_GPIO_Port GPIOA
-#define STLINK_TX_Pin GPIO_PIN_3
-#define STLINK_TX_GPIO_Port GPIOA
-
 /* USER CODE BEGIN Private defines */
-#define WKUP_BLE GPIO_PIN_8
-#define WKUP_BLE_GPIO_Port GPIOA
 
 /* USER CODE END Private defines */
 

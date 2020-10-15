@@ -20,7 +20,9 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #ifndef __SERIAL_H__
 #define __SERIAL_H__
 
 #endif // __SERIAL_H__
+#endif

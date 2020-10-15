@@ -289,7 +289,7 @@ __weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
 __weak void HAL_IncTick(void)
 {
   uwTick++;
-  un_system_flags.flag.rtc_tick = true;
+ // un_system_flags.flag.rtc_tick = true;
 }
 
 /**
@@ -302,6 +302,7 @@ __weak uint32_t HAL_GetTick(void)
 {
   return uwTick;
 }
+
 
 /**
   * @brief This function provides minimum delay (in milliseconds) based
@@ -319,15 +320,13 @@ __weak void HAL_Delay(uint32_t Delay)
   uint32_t tickstart = HAL_GetTick();
   uint32_t wait = Delay;
 
-  /* Add a period to guaranty minimum wait */
-  if (wait < HAL_MAX_DELAY)
-  {
-    wait++;
-  }
 
-  while((HAL_GetTick() - tickstart) < wait)
-  {
-  }
+  /* Add a period to guaranty minimum wait */
+    if (wait < HAL_MAX_DELAY)
+    {
+       wait++;
+    }
+    while((HAL_GetTick() - tickstart) < wait);
 }
 
 /**

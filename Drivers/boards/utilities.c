@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+
 #include <stdlib.h>
 #include <stdio.h>
 #include "utilities.h"
@@ -90,3 +91,4 @@ int8_t Nibble2HexChar( uint8_t a )
         return '?';
     }
 }
+

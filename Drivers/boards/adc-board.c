@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #include <stdint.h>
 #include <stdbool.h>
 #include "stm32l0xx.h"
@@ -126,3 +127,4 @@ uint16_t AdcMcuReadChannel( Adc_t *obj, uint32_t channel )
 
     return adcData;
 }
+#endif

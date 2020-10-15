@@ -33,6 +33,7 @@ extern "C"
 #include "LmHandlerTypes.h"
 #include "LmhpCompliance.h"
 
+extern CommissioningParams_t CommissioningParams;
 
 typedef struct LmHandlerJoinParams_s
 {

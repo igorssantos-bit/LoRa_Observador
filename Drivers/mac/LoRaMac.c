@@ -46,6 +46,7 @@
 #include "LoRaMacAdr.h"
 
 #include "LoRaMac.h"
+#include "stdio.h"
 
 /*!
  * Maximum PHY layer payload size
@@ -591,7 +592,8 @@ LoRaMacStatus_t SetTxContinuousWave1( uint16_t timeout, uint32_t frequency, uint
 /*!
  * \brief Resets MAC specific parameters to default
  */
-static void ResetMacParameters( void );
+//TODO: aqui ou no ponto H
+//static void ResetMacParameters( void );
 
 /*!
  * \brief Initializes and opens the reception window
@@ -1329,7 +1331,7 @@ static void ProcessRadioRxDone( void )
     UpdateRxSlotIdleState( );
 }
 
-static void ProcessRadioTxTimeout( void )
+void ProcessRadioTxTimeout( void )
 {
     if( MacCtx.NvmCtx->DeviceClass != CLASS_C )
     {
@@ -2503,7 +2505,8 @@ static void RemoveMacCommands( LoRaMacRxSlot_t rxSlot, LoRaMacFrameCtrl_t fCtrl,
 }
 
 
-static void ResetMacParameters( void )
+//static void ResetMacParameters( void )
+void ResetMacParameters( void )
 {
     MacCtx.NvmCtx->NetworkActivation = ACTIVATION_TYPE_NONE;
 

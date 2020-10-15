@@ -32,6 +32,8 @@
 
 #include "LmHandlerMsgDisplay.h"
 
+#include "debug.h"
+
 extern UART_HandleTypeDef huart1;
 #define TX_BUF_DIM2		24
 
@@ -421,6 +423,50 @@ void DisplayRxUpdate( LmHandlerAppData_t *appData, LmHandlerRxParams_t *params )
     printf( "RX SNR      : %d\r\n", params->Snr );
 
     printf( "\r\n" );
+}
+
+
+void DisplayRxUpdate2( LmHandlerAppData_t *appData, LmHandlerRxParams_t *params ){
+    const char *slotStrings[] = { "1", "2", "C", "C Multicast", "B Ping-Slot", "B Multicast Ping-Slot" };
+    //uint8_t txBuffer[TX_BUF_DIM2];
+
+    if( params->IsMcpsIndication == 0 )
+    {
+    	fnDEBUG_Const_String( "\r\n###### ========== MLME-Indication ========== ######\r\n" );
+    	fnDEBUG_Const_String("STATUS   :");
+    	fnDEBUG_Const_String(EventInfoStatusStrings[params->Status]);
+    	fnDEBUG_Const_String("\r\n");
+        return;
+    }
+
+    fnDEBUG_Const_String( "\r\n###### ========== MCPS-Indication ========== ######\r\n" );
+	fnDEBUG_Const_String("STATUS   :");
+	fnDEBUG_Const_String(EventInfoStatusStrings[params->Status]);
+	fnDEBUG_Const_String("\r\n");
+
+	fnDEBUG_Const_String( "RX WINDOW   :");
+	fnDEBUG_Const_String( slotStrings[params->RxSlot]);
+	fnDEBUG_Const_String("\r\n");
+
+	fnDEBUG_8bit_Hex("RX PORT : ", appData->Port, " \r\n" );
+
+	fnDEBUG_8bit_Hex("DATA RATE : DR_", params->Datarate, " \r\n" );
+	fnDEBUG_8bit_Hex("RX RSSI : ", params->Rssi, " \r\n" );
+	fnDEBUG_8bit_Hex("RX SNR : ", params->Snr, " \r\n" );
+	fnDEBUG_32bit_Hex("RX Counter: ", params->DownlinkCounter,"\r\n");
+
+/*
+
+    if( appData->BufferSize != 0 )
+    {
+        printf( "RX DATA : \r\n" );
+    	//sprintf((char*)txBuffer, "RX DATA : " );
+    	//HAL_UART_Transmit( &huart1, txBuffer, strlen( (char const*)txBuffer ), 1000 );
+
+        PrintHexBuffer( appData->Buffer, appData->BufferSize );
+    }
+
+    */
 }
 
 void DisplayBeaconUpdate( LoRaMAcHandlerBeaconParams_t *params )

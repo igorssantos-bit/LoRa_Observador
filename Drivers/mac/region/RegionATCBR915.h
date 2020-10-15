@@ -50,6 +50,7 @@
  */
 //#define ATCBR915_TX_MIN_DATARATE                       DR_0
 #define ATCBR915_TX_MIN_DATARATE                       DR_3
+//#define ATCBR915_TX_MIN_DATARATE                       DR_2
 
 /*!
  * Maximal datarate that can be used by the node
@@ -69,12 +70,15 @@
 /*!
  * Default datarate used by the node
  */
+//#define ATCBR915_DEFAULT_DATARATE                      DR_2
 #define ATCBR915_DEFAULT_DATARATE                      DR_3
+//#define ATCBR915_DEFAULT_DATARATE                      DR_0
 
 /*!
  * The minimum datarate which is used when the
  * dwell time is limited.
  */
+//#define ATCBR915_DWELL_LIMIT_DATARATE                  DR_2
 #define ATCBR915_DWELL_LIMIT_DATARATE                  DR_3
 
 /*!
@@ -135,7 +139,7 @@
 /*!
  * ADR Ack delay
  */
-#define ATCBR915_ADR_ACK_DELAY                         32
+#define ATCBR915_ADR_ACK_DELAY                         128//32
 
 /*!
  * Enabled or disabled the duty cycle
@@ -145,7 +149,7 @@
 /*!
  * Maximum RX window duration
  */
-#define ATCBR915_MAX_RX_WINDOW                         3000
+#define ATCBR915_MAX_RX_WINDOW                         6000
 
 /*!
  * Receive delay 1
@@ -177,7 +181,7 @@
 /*!
  * Ack timeout
  */
-#define ATCBR915_ACKTIMEOUT                            2000
+#define ATCBR915_ACKTIMEOUT                            5000
 
 /*!
  * Random ack timeout limits
@@ -317,7 +321,7 @@ static const uint8_t MaxPayloadOfDatarateRepeaterDwell0ATCBR915[] = { 51, 51, 51
  * The table is valid for the dwell time configuration of 1 for uplinks.
  */
 //static const uint8_t MaxPayloadOfDatarateDwell1ATCBR915[] = { 0, 0, 11, 53, 125, 242, 242, 0, 53, 129, 242, 242, 242, 242 };
-static const uint8_t MaxPayloadOfDatarateDwell1ATCBR915[] = { 0, 0, 12, 242, 125, 242, 242, 0, 53, 129, 242, 242, 242, 242 };
+static const uint8_t MaxPayloadOfDatarateDwell1ATCBR915[] = { 0, 0, 12, 53, 125, 242, 242, 0, 53, 129, 242, 242, 242, 242 };
 
 /*!
  * Maximum payload with respect to the datarate index. Can operate with repeater.

@@ -29,12 +29,12 @@
 /*************************************************************************************************/
 
 
-#define ADC_REFERENCE                        (1.0/1.48)*3300.0       // ADC Reference in miliVolts
-#define ADC_DIV_RES							 (1.97*33.0)/(1.50)      // constante de conversão A/D
+#define ADC_REFERENCE                        (1.0/1.48)*2800.0       // ADC Reference in miliVolts
+#define ADC_DIV_RES							 (1.97*28.0)/(1.50)      // constante de conversão A/D
 #define ADC_RESOLUTION                       4096                    // 12 bits
 
-#define ADC_BATTERY_OK_MIN_100MV             33      
-#define ADC_BATTERY_OK_MIN_3300mV             33
+#define ADC_BATTERY_OK_MIN_100MV             32
+#define ADC_BATTERY_OK_MIN_3300mV            32
 
 
 /*************************************************************************************************/
@@ -62,6 +62,7 @@ typedef struct {
 /*************************************************************************************************/
 /*    VARIABLES                                                                                  */
 /*************************************************************************************************/
+extern ADC_HandleTypeDef hadc1;
 /*
 const st_adc_channel_config_t st_adc_channel_config[INPUT_ANALOGIC_DEFINITION_SIZE] = {
    
@@ -91,25 +92,39 @@ void fnINPUT_ANALOGIC_Init ( void ) {
 
    return;
 */
+
+
 }
 
+/*
+ *
+ *
+		HAL_ADC_Start(&hadc1);
 
+		if (HAL_ADC_PollForConversion(&hadc1, 1000000) == HAL_OK)
+		{
+		  uint16_t ADCValue = HAL_ADC_GetValue(&hadc1);
+		  fnDEBUG_16bit_Int_Value("adc = ", ADCValue, "\r\n");
+		  //printf("adc = %d", ADCValue );
+		}
+ *
+ */
 
 bool fnINPUT_ANALOGIC_Get_Battery ( volatile uint8_t * u8_battery ) {
 	/* TODO: implementar esta função */
 
 	uint16_t batteryRaw;
 
-	while (__HAL_PWR_GET_FLAG(PWR_FLAG_VREFINTRDY) == RESET) {};
-	__HAL_RCC_ADC1_CLK_ENABLE();
-	HAL_ADCEx_Calibration_Start( &hadc, ADC_SINGLE_ENDED );
+//	while (__HAL_PWR_GET_FLAG(PWR_FLAG_VREFINTRDY) == RESET) {};
+//	__HAL_RCC_ADC1_CLK_ENABLE();
+//	HAL_ADCEx_Calibration_Start( &hadc1, ADC_SINGLE_ENDED );
 
-    HAL_ADC_Start( &hadc );
-	HAL_ADC_PollForConversion( &hadc, 1000 );
+    HAL_ADC_Start( &hadc1 );
+	HAL_ADC_PollForConversion( &hadc1, 10000 );
 
-	batteryRaw = HAL_ADC_GetValue( &hadc );
+	batteryRaw = HAL_ADC_GetValue( &hadc1 );
 
-	HAL_ADC_Stop( &hadc );
+	HAL_ADC_Stop( &hadc1 );
 
 	// TODO: Corrigir falsos alarmes: às vezes, esta função retorna valor baixo da bateria, sem aparentemente estar baixo.
 	*u8_battery = round( (float)( ADC_DIV_RES * batteryRaw ) / ADC_RESOLUTION );
@@ -120,6 +135,7 @@ bool fnINPUT_ANALOGIC_Get_Battery ( volatile uint8_t * u8_battery ) {
 	else {
 		return false; // battery not ok
 	}
+
 /*
    bool b_battery_nok;
 

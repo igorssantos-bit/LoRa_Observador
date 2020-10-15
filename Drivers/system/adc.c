@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #include <stdbool.h>
 #include "adc-board.h"
 
@@ -55,3 +56,4 @@ uint16_t AdcReadChannel( Adc_t *obj, uint32_t channel )
         return 0;
     }
 }
+#endif

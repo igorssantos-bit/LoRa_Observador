@@ -1052,12 +1052,12 @@ HAL_StatusTypeDef HAL_RTCEx_SetWakeUpTimer_IT(RTC_HandleTypeDef *hrtc, uint32_t 
   /*Check RTC WUTWF flag is reset only when wake up timer enabled*/
   if ((hrtc->Instance->CR & RTC_CR_WUTE) != 0U)
   {
-    tickstart = HAL_GetTick();
+    tickstart = RtcGetTimerValue();
 
     /* Wait till RTC WUTWF flag is reset and if Time out is reached exit */
     while (__HAL_RTC_WAKEUPTIMER_GET_FLAG(hrtc, RTC_FLAG_WUTWF) == 1U)
     {
-      if ((HAL_GetTick() - tickstart) > RTC_TIMEOUT_VALUE)
+      if ((RtcGetTimerValue() - tickstart) > RTC_TIMEOUT_VALUE)
       {
         /* Enable the write protection for RTC registers */
         __HAL_RTC_WRITEPROTECTION_ENABLE(hrtc);
@@ -1077,12 +1077,12 @@ HAL_StatusTypeDef HAL_RTCEx_SetWakeUpTimer_IT(RTC_HandleTypeDef *hrtc, uint32_t 
   /* Clear flag Wake-Up */
   __HAL_RTC_WAKEUPTIMER_CLEAR_FLAG(hrtc, RTC_FLAG_WUTF);
 
-  tickstart = HAL_GetTick();
+  tickstart = RtcGetTimerValue();
 
   /* Wait till RTC WUTWF flag is set and if Time out is reached exit */
   while (__HAL_RTC_WAKEUPTIMER_GET_FLAG(hrtc, RTC_FLAG_WUTWF) == 0U)
   {
-    if ((HAL_GetTick() - tickstart) > RTC_TIMEOUT_VALUE)
+    if ((RtcGetTimerValue() - tickstart) > RTC_TIMEOUT_VALUE)
     {
       /* Enable the write protection for RTC registers */
       __HAL_RTC_WRITEPROTECTION_ENABLE(hrtc);

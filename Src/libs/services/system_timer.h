@@ -25,7 +25,7 @@
 /*    DEFINES                                                                                    */
 /*************************************************************************************************/
 
-#define  SYSTEM_TICK_PERIOD_MS      1U         /* Miliseconds */
+#define  SYSTEM_TICK_PERIOD_MS      1000U         /* 1U Miliseconds */
 #define  timer_size_t               uint32_t
 #define  MS_TO_TICKS( ms )          ((timer_size_t)( ms / SYSTEM_TICK_PERIOD_MS ))
 #define  NUMBER_OF_COUNTERS         8

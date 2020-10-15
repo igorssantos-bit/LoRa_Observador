@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #ifndef __UART_BOARD_H__
 #define __UART_BOARD_H__
 
@@ -97,3 +98,4 @@ uint8_t UartMcuGetChar( Uart_t *obj, uint8_t *data );
 uint8_t UartMcuGetBuffer( Uart_t *obj, uint8_t *buffer, uint16_t size, uint16_t *nbReadBytes );
 
 #endif // __UART_BOARD_H__
+#endif

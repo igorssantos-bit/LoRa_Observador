@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include "utilities.h"
 #include "i2c-board.h"
+#include "stm32l0xx.h"
 
 /*!
  * Flag to indicates if the I2C is initialized

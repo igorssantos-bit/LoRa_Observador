@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #include "stm32l0xx.h"
 #include "utilities.h"
 #include "board.h"
@@ -302,6 +303,7 @@ uint8_t UartMcuGetBuffer( Uart_t *obj, uint8_t *buffer, uint16_t size, uint16_t 
 
 void HAL_UART_TxCpltCallback( UART_HandleTypeDef *handle )
 {
+#if 0
     if( IsFifoEmpty( &Uart2.FifoTx ) == false )
     {
         TxData = FifoPop( &Uart2.FifoTx );
@@ -313,10 +315,12 @@ void HAL_UART_TxCpltCallback( UART_HandleTypeDef *handle )
     {
         Uart2.IrqNotify( UART_NOTIFY_TX );
     }
+#endif
 }
 
 void HAL_UART_RxCpltCallback( UART_HandleTypeDef *handle )
 {
+#if 0
     if( IsFifoFull( &Uart2.FifoRx ) == false )
     {
         // Read one byte from the receive data register
@@ -329,6 +333,7 @@ void HAL_UART_RxCpltCallback( UART_HandleTypeDef *handle )
     }
 
     HAL_UART_Receive_IT( &UartHandle, &RxData, 1 );
+#endif
 }
 
 void HAL_UART_ErrorCallback( UART_HandleTypeDef *handle )
@@ -340,3 +345,4 @@ void USART2_IRQHandler( void )
 {
     HAL_UART_IRQHandler( &UartHandle );
 }
+#endif

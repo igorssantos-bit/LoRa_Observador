@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #ifndef __GPS_BOARD_H__
 #define __GPS_BOARD_H__
 
@@ -72,3 +73,4 @@ void GpsMcuProcess( void );
 void GpsMcuIrqNotify( UartNotifyId_t id );
 
 #endif // __GPS_BOARD_H__
+#endif

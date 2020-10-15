@@ -1,3 +1,30 @@
+/*!
+ * \file      app.h
+ *
+ * \brief     This file contains all the functions prototypes for the
+ *            app.c driver.
+ *
+ * \copyright 2019 Sigmais.
+ *  All rights reserved.
+ *
+ * \code
+ *				 _____ _                       _
+ *				/  ___(_)                     (_)
+ *				\ `--. _  __ _ _ __ ___   __ _ _ ___
+ *				 `--. \ |/ _` | '_ ` _ \ / _` | / __|
+ *				/\__/ / | (_| | | | | | | (_| | \__ \
+ *				\____/|_|\__, |_| |_| |_|\__,_|_|___/
+ *						  __/ | (C)2018-2020 Sigmais
+ *						 |___/
+ *
+ * \endcode
+ *
+ * \author    Marcelo Souza Fassarella ( EBM )
+ *
+ * This software component is a Sigmais property.
+ * You may not use this file except previously authorized by Sigmais.
+ *
+ */
 #ifndef _APP_H
 #define _APP_H
 
@@ -11,16 +38,20 @@
 /*************************************************************************************************/
 
 extern uint8_t au8_downlink_frame[8];
+uint8_t flag_rejoin;
 
 /*************************************************************************************************/
 /*    DEFINES                                                                                    */
 /*************************************************************************************************/
-
+//float fltTime;
 
 /*************************************************************************************************/
 /*    TYPEDEFS                                                                                   */
 /*************************************************************************************************/
 
+//#define AJUSTE_TIMER_CLOCK_LENTO  224.8  // -> 126 em app.c
+//#define AJUSTE_TIMER_CLOCK_RAPIDO 781.0  // -> 126 em app.c
+#define MAX_MSG_BUSY     10  // MAXIMO NÚMERO DE MSG QUE DAO RADIO BUSY EM SEQUENCIA
 
 /*************************************************************************************************/
 /*    EXTERNAL PROTOTYPES                                                                        */
@@ -31,8 +62,7 @@ void fnAPP_Init ( void );
 void fnAPP_Check_Events ( void );
 void fnAPP_Process_Events ( void );
 void fnAPP_Enter_Low_Power ( void );
-void fnAPP_Process_Event_RTC ( void );
-
+void validateTransmissionTimer(void);
 
 #endif  /* _APP_H */
 

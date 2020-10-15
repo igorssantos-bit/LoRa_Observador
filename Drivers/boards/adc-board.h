@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #ifndef __ADC_BOARD_H__
 #define __ADC_BOARD_H__
 
@@ -47,3 +48,4 @@ void AdcMcuConfig( void );
 uint16_t AdcMcuReadChannel( Adc_t *obj, uint32_t channel );
 
 #endif // __ADC_BOARD_H__
+#endif

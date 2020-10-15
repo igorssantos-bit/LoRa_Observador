@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #ifndef __ADC_H__
 #define __ADC_H__
 
@@ -59,3 +60,4 @@ void AdcDeInit( Adc_t *obj );
 uint16_t AdcReadChannel( Adc_t *obj, uint32_t channel );
 
 #endif // __ADC_H__
+#endif

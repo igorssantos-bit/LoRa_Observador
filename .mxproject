@@ -1,7 +1,7 @@
 [PreviousGenFiles]
-HeaderPath=E:/sigmais/projeto_1/fw/lorabase/Inc
+HeaderPath=E:/sigmais/projeto_1/fw/sense/Inc
 HeaderFiles=stm32l0xx_it.h;stm32l0xx_hal_conf.h;main.h;
-SourcePath=E:/sigmais/projeto_1/fw/lorabase/Src
+SourcePath=E:/sigmais/projeto_1/fw/sense/Src
 SourceFiles=stm32l0xx_it.c;stm32l0xx_hal_msp.c;main.c;
 
 [PreviousLibFiles]

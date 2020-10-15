@@ -94,17 +94,43 @@ Gpio_t DbgPinTx;
 Gpio_t DbgPinRx;
 #endif
 
+/*
+void SX1276IoInit( void )
+{
+  GPIO_InitTypeDef initStruct={0};
+
+  SX1276BoardInit( &BoardCallbacks );
+
+  initStruct.Mode =GPIO_MODE_IT_RISING;
+  initStruct.Pull = GPIO_PULLDOWN;
+  initStruct.Speed = GPIO_SPEED_HIGH;
+
+  HW_GPIO_Init( RADIO_DIO_0_PORT, RADIO_DIO_0_PIN, &initStruct );
+  HW_GPIO_Init( RADIO_DIO_1_PORT, RADIO_DIO_1_PIN, &initStruct );
+  HW_GPIO_Init( RADIO_DIO_2_PORT, RADIO_DIO_2_PIN, &initStruct );
+  HW_GPIO_Init( RADIO_DIO_3_PORT, RADIO_DIO_3_PIN, &initStruct );
+#ifdef RADIO_DIO_4
+  HW_GPIO_Init( RADIO_DIO_4_PORT, RADIO_DIO_4_PIN, &initStruct );
+#endif
+#ifdef RADIO_DIO_5
+  HW_GPIO_Init( RADIO_DIO_5_PORT, RADIO_DIO_5_PIN, &initStruct );
+#endif
+  initStruct.Mode =GPIO_MODE_OUTPUT_PP;
+  initStruct.Pull = GPIO_NOPULL;
+  HW_GPIO_Init( RADIO_TCXO_VCC_PORT, RADIO_TCXO_VCC_PIN, &initStruct );
+}
+*/
 void SX1276IoInit( void )
 {
     GpioInit( &SX1276.Spi.Nss, RADIO_NSS, PIN_OUTPUT, PIN_PUSH_PULL, PIN_PULL_UP, 1 );
 
-    GpioInit( &SX1276.DIO0, RADIO_DIO_0, PIN_INPUT, PIN_PUSH_PULL, PIN_PULL_UP, 0 );
-    GpioInit( &SX1276.DIO1, RADIO_DIO_1, PIN_INPUT, PIN_PUSH_PULL, PIN_PULL_UP, 0 );
-    GpioInit( &SX1276.DIO2, RADIO_DIO_2, PIN_INPUT, PIN_PUSH_PULL, PIN_PULL_UP, 0 );
-    GpioInit( &SX1276.DIO3, RADIO_DIO_3, PIN_INPUT, PIN_PUSH_PULL, PIN_PULL_UP, 0 );
-    GpioInit( &SX1276.DIO4, RADIO_DIO_4, PIN_INPUT, PIN_PUSH_PULL, PIN_PULL_UP, 0 );
-    GpioInit( &SX1276.DIO5, RADIO_DIO_5, PIN_INPUT, PIN_PUSH_PULL, PIN_PULL_UP, 0 );
-}
+    GpioInit( &SX1276.DIO0, RADIO_DIO_0, PIN_INPUT, PIN_OPEN_DRAIN, PIN_PULL_DOWN, 0 );
+    GpioInit( &SX1276.DIO1, RADIO_DIO_1, PIN_INPUT, PIN_OPEN_DRAIN, PIN_PULL_DOWN, 0 );
+    GpioInit( &SX1276.DIO2, RADIO_DIO_2, PIN_INPUT, PIN_OPEN_DRAIN, PIN_PULL_DOWN, 0 );
+    GpioInit( &SX1276.DIO3, RADIO_DIO_3, PIN_INPUT, PIN_OPEN_DRAIN, PIN_PULL_DOWN, 0 );
+    //GpioInit( &SX1276.DIO4, RADIO_DIO_4, PIN_INPUT, PIN_OPEN_DRAIN, PIN_NO_PULL, 0 );
+    //GpioInit( &SX1276.DIO5, RADIO_DIO_5, PIN_INPUT, PIN_OPEN_DRAIN, PIN_NO_PULL, 0 );
+ }
 
 void SX1276IoIrqInit( DioIrqHandler **irqHandlers )
 {
@@ -112,20 +138,23 @@ void SX1276IoIrqInit( DioIrqHandler **irqHandlers )
     GpioSetInterrupt( &SX1276.DIO1, IRQ_RISING_EDGE, IRQ_HIGH_PRIORITY, irqHandlers[1] );
     GpioSetInterrupt( &SX1276.DIO2, IRQ_RISING_EDGE, IRQ_HIGH_PRIORITY, irqHandlers[2] );
     GpioSetInterrupt( &SX1276.DIO3, IRQ_RISING_EDGE, IRQ_HIGH_PRIORITY, irqHandlers[3] );
-    GpioSetInterrupt( &SX1276.DIO4, IRQ_RISING_EDGE, IRQ_HIGH_PRIORITY, irqHandlers[4] );
-    GpioSetInterrupt( &SX1276.DIO5, IRQ_RISING_EDGE, IRQ_HIGH_PRIORITY, irqHandlers[5] );
+    //GpioSetInterrupt( &SX1276.DIO4, IRQ_RISING_EDGE, IRQ_HIGH_PRIORITY, irqHandlers[4] );
+    // isn't possible use DIO5 = PA4 and DIO0 = PB4 at the same time in interruption mode
+    // stm32 uses a multiplexer to choose what PORT is connected at EXTI line, then when
+    // PA4 and PB4 are configured together as interrupt source, only one of them will work properly
+    //GpioSetInterrupt( &SX1276.DIO5, IRQ_RISING_EDGE, IRQ_HIGH_PRIORITY, irqHandlers[5] );
 }
 
 void SX1276IoDeInit( void )
 {
     GpioInit( &SX1276.Spi.Nss, RADIO_NSS, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 1 );
 
-    GpioInit( &SX1276.DIO0, RADIO_DIO_0, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
-    GpioInit( &SX1276.DIO1, RADIO_DIO_1, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
-    GpioInit( &SX1276.DIO2, RADIO_DIO_2, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
-    GpioInit( &SX1276.DIO3, RADIO_DIO_3, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
-    GpioInit( &SX1276.DIO4, RADIO_DIO_4, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
-    GpioInit( &SX1276.DIO5, RADIO_DIO_5, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
+    GpioInit( &SX1276.DIO0, RADIO_DIO_0, PIN_INPUT, PIN_OPEN_DRAIN, PIN_PULL_DOWN, 0 );
+    GpioInit( &SX1276.DIO1, RADIO_DIO_1, PIN_INPUT, PIN_OPEN_DRAIN, PIN_PULL_DOWN, 0 );
+    GpioInit( &SX1276.DIO2, RADIO_DIO_2, PIN_INPUT, PIN_OPEN_DRAIN, PIN_PULL_DOWN, 0 );
+    GpioInit( &SX1276.DIO3, RADIO_DIO_3, PIN_INPUT, PIN_PUSH_PULL, PIN_PULL_DOWN, 0 );
+    //GpioInit( &SX1276.DIO4, RADIO_DIO_4, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
+    //GpioInit( &SX1276.DIO5, RADIO_DIO_5, PIN_INPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
 }
 
 void SX1276IoDbgInit( void )

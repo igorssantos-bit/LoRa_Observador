@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #include "uart-board.h"
 #include "uart.h"
 
@@ -62,3 +63,4 @@ uint8_t UartGetBuffer( Uart_t *obj, uint8_t *buffer, uint16_t size, uint16_t *nb
 {
     return UartMcuGetBuffer( obj, buffer, size, nbReadBytes );
 }
+#endif

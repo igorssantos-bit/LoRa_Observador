@@ -25,6 +25,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #ifndef __DISPLAY_BOARD_H__
 #define __DISPLAY_BOARD_H__
 
@@ -291,3 +292,4 @@ void DisplayPrint( const char *string );
 void DisplayPrintf( const char *format, ... );
 
 #endif // __DISPLAY_BOARD_H__
+#endif

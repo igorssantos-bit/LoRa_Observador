@@ -22,6 +22,7 @@
  *
  * \author    Johannes Bruder ( STACKFORCE )
  */
+
 #ifndef __DELAY_BOARD_H__
 #define __DELAY_BOARD_H__
 
@@ -35,3 +36,4 @@
 void DelayMsMcu( uint32_t ms );
 
 #endif // __DELAY_BOARD_H__
+

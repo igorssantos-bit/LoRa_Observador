@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #ifndef __UART_H__
 #define __UART_H__
 
@@ -184,3 +185,4 @@ uint8_t UartGetChar( Uart_t *obj, uint8_t *data );
 uint8_t UartGetBuffer( Uart_t *obj, uint8_t *buffer, uint16_t size, uint16_t *nbReadBytes );
 
 #endif // __UART_H__
+#endif

@@ -77,6 +77,7 @@ void DisplayTxUpdate( LmHandlerTxParams_t* params );
  * \param [IN] params Rx parameters
  */
 void DisplayRxUpdate( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params );
+void DisplayRxUpdate2( LmHandlerAppData_t *appData, LmHandlerRxParams_t *params );
 
 /*!
  * \brief Displays beacon status update

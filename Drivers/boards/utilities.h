@@ -28,13 +28,20 @@
 /*!
  * Generic definition
  */
-#ifndef SUCCESS
-#define SUCCESS                                     1
-#endif
 
-#ifndef FAIL
-#define FAIL                                        0
+/*
+ *  Definição de SUCESS ocorre em stm32L0xx.h
+ *
+#ifndef SUCCESS
+#define SUCCESS                                     0
 #endif
+*/
+
+
+//#ifndef FAIL
+//#define FAIL                                        1
+//#endif
+
 
 /*!
  * \brief Returns the minimum value between a and b

@@ -1,3 +1,30 @@
+/*!
+ * \file      lsm303agr_reg.c
+ *
+ * \brief     LSM303AGR driver file
+ *
+ * \copyright 2019 Sigmais.
+ *  All rights reserved.
+ *
+ * \code
+ *				 _____ _                       _
+ *				/  ___(_)                     (_)
+ *				\ `--. _  __ _ _ __ ___   __ _ _ ___
+ *				 `--. \ |/ _` | '_ ` _ \ / _` | / __|
+ *				/\__/ / | (_| | | | | | | (_| | \__ \
+ *				\____/|_|\__, |_| |_| |_|\__,_|_|___/
+ *						  __/ | (C)2018-2020 Sigmais
+ *						 |___/
+ *
+ * \endcode
+ *
+ * \author    Marcelo Souza Fassarella ( EBM )
+ *
+ * This software component is a Sigmais property.
+ * You may not use this file except previously authorized by Sigmais.
+ *
+ */
+
 /*
   ******************************************************************************
   * @file    lsm303agr_reg.c
@@ -34,7 +61,9 @@
   *
   */
 
+
 #include "lsm303agr_reg.h"
+#include "stm32l0xx_hal.h"
 
 /**
   * @defgroup  LSM303AGR
@@ -2713,23 +2742,8 @@ int32_t lsm303agr_mag_int_gen_source_get(lsm303agr_ctx_t *ctx,
   int32_t ret;
   uint8_t aux8;
   ret = lsm303agr_read_reg(ctx, LSM303AGR_INT_SOURCE_REG_M,
-                           &aux8, 1);
+                           (uint8_t *)val, 1);
 
-
-  //aux8 =  (uint8_t *)val;
-  // No error
-  if (ret == 0){
-	  if (aux8 & 0xFC){
-		  ret = 1; // exceds threshold on X or Y or Z
-	  }
-	  else{
-		  ret = 0; // no flag
-	  }
-
-  }
-  else{
-	  ret = 0; // without flags
-  }
   return ret;
 }
 
@@ -3569,6 +3583,41 @@ int32_t lsm303agr_mag_i2c_interface_get(lsm303agr_ctx_t *ctx,
       break;
   }
   return ret;
+}
+
+
+/*************************************************************************************************/
+/*    LOW LEVEL FUNCTIONS                                                                         */
+/*************************************************************************************************/
+int32_t accel_write(void *handle, uint8_t reg, uint8_t *buff, uint16_t len)
+{
+	// enable auto incremented in multiple read/write commands
+	reg |= 0x80;
+	return (HAL_I2C_Mem_Write( (I2C_HandleTypeDef *) handle, LSM303AGR_I2C_ADD_XL, reg, I2C_MEMADD_SIZE_8BIT, buff, len, 1000));
+}
+
+int32_t accel_read(void *handle, uint8_t reg, uint8_t *buff, uint16_t len)
+{
+	// enable auto incremented in multiple read/write commands
+	reg |= 0x80;
+	return (HAL_I2C_Mem_Read((I2C_HandleTypeDef *) handle, LSM303AGR_I2C_ADD_XL, reg, I2C_MEMADD_SIZE_8BIT, buff, len, 1000));
+}
+
+int32_t magnet_write(void *handle, uint8_t reg, uint8_t *buff, uint16_t len)
+{
+	// enable auto incremented in multiple read/write commands
+	reg |= 0x80;
+	return (HAL_I2C_Mem_Write((I2C_HandleTypeDef *) handle, LSM303AGR_I2C_ADD_MG, reg, I2C_MEMADD_SIZE_8BIT, buff, len, 1000));
+}
+
+
+int32_t magnet_read(void *handle, uint8_t reg, uint8_t *buff, uint16_t len)
+{
+
+	// enable auto incremented in multiple read/write commands
+	reg |= 0x80;
+	return (HAL_I2C_Mem_Read((I2C_HandleTypeDef *) handle, LSM303AGR_I2C_ADD_MG, reg, I2C_MEMADD_SIZE_8BIT, buff, len, 1000));
+
 }
 
 /**

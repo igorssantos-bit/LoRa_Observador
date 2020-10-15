@@ -1,3 +1,30 @@
+/*!
+ * \file      app_state_machine.h
+ *
+ * \brief     State Machine Definitions
+ *
+ * \copyright 2019 Sigmais.
+ *  All rights reserved.
+ *
+ * \code
+ *				 _____ _                       _
+ *				/  ___(_)                     (_)
+ *				\ `--. _  __ _ _ __ ___   __ _ _ ___
+ *				 `--. \ |/ _` | '_ ` _ \ / _` | / __|
+ *				/\__/ / | (_| | | | | | | (_| | \__ \
+ *				\____/|_|\__, |_| |_| |_|\__,_|_|___/
+ *						  __/ | (C)2018-2020 Sigmais
+ *						 |___/
+ *
+ * \endcode
+ *
+ * \author    Marcelo Souza Fassarella ( EBM )
+ *
+ * This software component is a Sigmais property.
+ * You may not use this file except previously authorized by Sigmais.
+ *
+ */
+
 #ifndef _APP_STATE_MACHINE_H
 #define _APP_STATE_MACHINE_H
 
@@ -13,6 +40,9 @@
 /*************************************************************************************************/
 /*    DEFINES                                                                                    */
 /*************************************************************************************************/
+#ifndef DEVEL_UDEV
+#define DEVEL_UDEV 1  //parqu�metro
+#endif
 
 
 /*************************************************************************************************/
@@ -21,21 +51,16 @@
 
 
 typedef enum {
+
    APP_STATE_INIT = 0,
-   APP_STATE_CONFIGURATION,
+   APP_STATE_CHECK_CONFIG,
    APP_STATE_RUN,
-   APP_STATE_BLE_TX,
-   APP_STATE_BLE_RX,
-   APP_STATE_SEND_BLE_DATA,
-   APP_STATE_WAIT
-   //APP_STATE_CHECK_CONFIG
+   APP_STATE_DETECTION,
+   APP_STATE_CONFIGURATION,
+   APP_STATE_CONFIRMING_DETECTION,
+   APP_STATE_WAIT_TRANSMISSION,
+   
 } en_app_state_t;
-
-/*************************************************************************************************/
-/*    VARIABLES                                                                                  */
-/*************************************************************************************************/
-
-extern volatile bool b_state_timer_timeout;
 
 
 /*************************************************************************************************/
@@ -45,8 +70,6 @@ extern volatile bool b_state_timer_timeout;
 
 void fnAPP_STATE_MACHINE_Init ( void );
 void fnAPP_STATE_Machine ( en_event_t event );
-en_app_state_t fnAPP_STATE_Machine_Get ( void );
-void fnAPP_STATE_Machine_Set_Data ( uint16_t u16_data );
 
 #endif  /* _APP_STATE_MACHINE_H */
 

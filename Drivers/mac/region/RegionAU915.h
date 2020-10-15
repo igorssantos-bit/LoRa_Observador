@@ -48,8 +48,8 @@
 /*!
  * Minimal datarate that can be used by the node
  */
-//#define AU915_TX_MIN_DATARATE                       DR_0
-#define AU915_TX_MIN_DATARATE                       DR_2
+#define AU915_TX_MIN_DATARATE                       DR_0
+
 
 /*!
  * Maximal datarate that can be used by the node
@@ -150,14 +150,12 @@
 /*!
  * Receive delay 1
  */
-//#define AU915_RECEIVE_DELAY1                        1000
-#define AU915_RECEIVE_DELAY1                        5000
+#define AU915_RECEIVE_DELAY1                        1000
 
 /*!
  * Receive delay 2
  */
-//#define AU915_RECEIVE_DELAY2                        2000
-#define AU915_RECEIVE_DELAY2                        6000
+#define AU915_RECEIVE_DELAY2                        2000
 
 /*!
  * Join accept delay 1

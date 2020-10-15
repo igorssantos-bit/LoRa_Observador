@@ -22,6 +22,7 @@
  */
 #include "delay-board.h"
 #include "delay.h"
+#include "rtc-board.h"
 
 void Delay( float s )
 {
@@ -30,5 +31,6 @@ void Delay( float s )
 
 void DelayMs( uint32_t ms )
 {
-    DelayMsMcu( ms );
+    //DelayMsMcu( ms );
+	RtcDelayMs(ms);
 }

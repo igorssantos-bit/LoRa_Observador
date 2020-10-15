@@ -28,8 +28,11 @@
 #if defined( BOARD_IOE_EXT )
 #include "gpio-ioe.h"
 #endif
-
+#include "system_flags.h"
+#include <stdio.h>
 static Gpio_t *GpioIrq[16];
+
+//extern volatile un_system_flags_t un_system_flags;
 
 void GpioMcuInit( Gpio_t *obj, PinNames pin, PinModes mode, PinConfigs config, PinTypes type, uint32_t value )
 {
@@ -324,19 +327,59 @@ uint32_t GpioMcuRead( Gpio_t *obj )
 
 void EXTI0_1_IRQHandler( void )
 {
-    HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_0 );
-    HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_1 );
+	if ((EXTI->PR & EXTI_PR_PR0)){
+        HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_0 );
+        //printf("Interrupção PINO_0\r\n");
+	}
+	if ((EXTI->PR & EXTI_PR_PR1)){
+       HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_1 );
+       //printf("Interrupção PINO_1\r\n");
+	}
 }
-/*
+
 void EXTI2_3_IRQHandler( void )
 {
-    HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_2 );
-    HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_3 );
+	// MAGNETÔMETRO
+	if ((EXTI->PR & EXTI_PR_PR2)){
+       HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_2 );
+       un_system_flags.flag.fxos_1_int_threshold = true;
+       //printf("Interrupcao PINO_2\r\n");
+	}
+
+	// XL2
+	if ((EXTI->PR & EXTI_PR_PR3)){
+	   HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_3 );
+
+	   if( HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3) == GPIO_PIN_SET ){
+	      // INATIVO
+		  un_system_flags.flag.lsm303agr_act = 0;
+
+	   }else if( HAL_GPIO_ReadPin(GPIOA, GPIO_PIN_3) == GPIO_PIN_RESET ){
+		  // ATIVO
+	      un_system_flags.flag.lsm303agr_act = 1;
+	   }
+
+	   //printf("Interrupcao PINO_3  %d\r\n", un_system_flags.flag.lsm303agr_act);
+	}
 }
-*/
+
 void EXTI4_15_IRQHandler( void )
 {
-    HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_4 );
+
+	// PULSOS1_IN
+	if ((EXTI->PR & EXTI_PR_PR14)){
+	      HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_14 );
+	      //printf("Interrupcao PINO_14\r\n");
+	      un_system_flags.flag.pulse1_flag = true;
+	}
+	// PULSOS2_IN
+	if ((EXTI->PR & EXTI_PR_PR15)){
+      HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_15 );
+      //printf("Interrupcao PINO_15\r\n");
+      un_system_flags.flag.pulse2_flag = true;
+	}
+	else{
+	HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_4 );
     HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_5 );
     HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_6 );
     HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_7 );
@@ -347,7 +390,7 @@ void EXTI4_15_IRQHandler( void )
     HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_12 );
     HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_13 );
     HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_14 );
-    HAL_GPIO_EXTI_IRQHandler( GPIO_PIN_15 );
+    }
 }
 
 void HAL_GPIO_EXTI_Callback( uint16_t gpioPin )
@@ -356,6 +399,7 @@ void HAL_GPIO_EXTI_Callback( uint16_t gpioPin )
 
     if( gpioPin > 0 )
     {
+    	//TODO: incluir timeout nesse while
         while( gpioPin != 0x01 )
         {
             gpioPin = gpioPin >> 1;

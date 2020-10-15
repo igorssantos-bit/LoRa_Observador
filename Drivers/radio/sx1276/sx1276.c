@@ -22,6 +22,7 @@
  *
  * \author    Wael Guibene ( Semtech )
  */
+#include "debug.h"
 #include <math.h>
 #include <string.h>
 #include "utilities.h"
@@ -30,6 +31,7 @@
 #include "delay.h"
 #include "sx1276.h"
 #include "sx1276-board.h"
+
 
 /*
  * Local types definition
@@ -401,7 +403,7 @@ void SX1276SetRxConfig( RadioModems_t modem, uint32_t bandwidth,
                          bool iqInverted, bool rxContinuous )
 {
     SX1276SetModem( modem );
-
+// debugar aqui
     switch( modem )
     {
     case MODEM_FSK:
@@ -1347,6 +1349,7 @@ uint32_t SX1276GetWakeupTime( void )
 
 void SX1276OnTimeoutIrq( void* context )
 {
+	fnDEBUG_Const_String("SX1276OnTimeoutIrq\r\n");
     switch( SX1276.Settings.State )
     {
     case RF_RX_RUNNING:
@@ -1424,9 +1427,11 @@ void SX1276OnDio0Irq( void* context )
 {
     volatile uint8_t irqFlags = 0;
 
+    fnDEBUG_Const_String("SX1276OnDio0Irq\r\n");
     switch( SX1276.Settings.State )
     {
         case RF_RX_RUNNING:
+        	fnDEBUG_Const_String("RF_RX_RUNNING Dio0IRQ\r\n");
             //TimerStop( &RxTimeoutTimer );
             // RxDone interrupt
             switch( SX1276.Settings.Modem )
@@ -1514,6 +1519,7 @@ void SX1276OnDio0Irq( void* context )
                 break;
             case MODEM_LORA:
                 {
+                	fnDEBUG_Const_String("dio0irq - Modem Lora\r\n");
                     // Clear Irq
                     SX1276Write( REG_LR_IRQFLAGS, RFLR_IRQFLAGS_RXDONE );
 
@@ -1586,6 +1592,7 @@ void SX1276OnDio0Irq( void* context )
             }
             break;
         case RF_TX_RUNNING:
+        	//fnDEBUG_Const_String("RF_TX_RUNNING Dio0IRQ\r\n"); --> gera timeout no RX
             TimerStop( &TxTimeoutTimer );
             // TxDone interrupt
             switch( SX1276.Settings.Modem )
@@ -1596,6 +1603,7 @@ void SX1276OnDio0Irq( void* context )
                 // Intentional fall through
             case MODEM_FSK:
             default:
+            	//fnDEBUG_Const_String("default: RF_TX_DONE Dio0IRQ\r\n");
                 SX1276.Settings.State = RF_IDLE;
                 if( ( RadioEvents != NULL ) && ( RadioEvents->TxDone != NULL ) )
                 {
@@ -1611,6 +1619,7 @@ void SX1276OnDio0Irq( void* context )
 
 void SX1276OnDio1Irq( void* context )
 {
+	fnDEBUG_Const_String("SX1276OnDio1Irq\r\n");
     switch( SX1276.Settings.State )
     {
         case RF_RX_RUNNING:
@@ -1653,6 +1662,7 @@ void SX1276OnDio1Irq( void* context )
                 }
                 break;
             case MODEM_LORA:
+            	fnDEBUG_Const_String("MODEM_LORA dio1irq\r\n");
                 // Sync time out
                 TimerStop( &RxTimeoutTimer );
                 // Clear Irq
@@ -1661,6 +1671,7 @@ void SX1276OnDio1Irq( void* context )
                 SX1276.Settings.State = RF_IDLE;
                 if( ( RadioEvents != NULL ) && ( RadioEvents->RxTimeout != NULL ) )
                 {
+                	fnDEBUG_Const_String("DIO_1_IRQ TIMEOUT\r\n");
                     RadioEvents->RxTimeout( );
                 }
                 break;
@@ -1686,6 +1697,7 @@ void SX1276OnDio1Irq( void* context )
                 }
                 break;
             case MODEM_LORA:
+            	fnDEBUG_Const_String("MODEM_LORA TX_RUNNING dio1irq\r\n");
                 break;
             default:
                 break;
@@ -1698,6 +1710,7 @@ void SX1276OnDio1Irq( void* context )
 
 void SX1276OnDio2Irq( void* context )
 {
+	fnDEBUG_Const_String("SX1276OnDio2Irq\r\n");
     switch( SX1276.Settings.State )
     {
         case RF_RX_RUNNING:
@@ -1768,6 +1781,7 @@ void SX1276OnDio2Irq( void* context )
 
 void SX1276OnDio3Irq( void* context )
 {
+	fnDEBUG_Const_String("SX1276OnDio3Irq\r\n");
     switch( SX1276.Settings.Modem )
     {
     case MODEM_FSK:
@@ -1799,6 +1813,7 @@ void SX1276OnDio3Irq( void* context )
 
 void SX1276OnDio4Irq( void* context )
 {
+	fnDEBUG_Const_String("SX1276OnDio4Irq\r\n");
     switch( SX1276.Settings.Modem )
     {
     case MODEM_FSK:
@@ -1818,6 +1833,7 @@ void SX1276OnDio4Irq( void* context )
 
 void SX1276OnDio5Irq( void* context )
 {
+	fnDEBUG_Const_String("SX1276OnDio5Irq\r\n");
     switch( SX1276.Settings.Modem )
     {
     case MODEM_FSK:

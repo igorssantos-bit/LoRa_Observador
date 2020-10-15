@@ -46,7 +46,7 @@
 
 #include "LoRaMacTest.h"
 
-static CommissioningParams_t CommissioningParams = 
+CommissioningParams_t CommissioningParams =
 {
     .IsOtaaActivation = OVER_THE_AIR_ACTIVATION,
     .DevEui = LORAWAN_DEVICE_EUI,
@@ -350,6 +350,7 @@ bool LmHandlerIsBusy( void )
     if( LmHandlerJoinStatus( ) != LORAMAC_HANDLER_SET )
     {
         // The network isn't yet joined, try again later.
+    	//printf("JoinStatusErro = RESET");
         LmHandlerJoin( );
         return true;
     }
@@ -425,6 +426,9 @@ static void LmHandlerJoinRequest( bool isOtaa )
 
 void LmHandlerJoin( void )
 {
+#if OVER_THE_AIR_ACTIVATION
+	CommissioningParams.IsOtaaActivation = ACTIVATION_TYPE_OTAA;
+#endif
     LmHandlerJoinRequest( CommissioningParams.IsOtaaActivation );
 }
 

@@ -20,6 +20,7 @@
  *
  * \author    Gregory Cristian ( Semtech )
  */
+#if 0
 #include <stdint.h>
 #include <stdlib.h>
 #include <math.h>
@@ -656,3 +657,4 @@ void GpsResetPosition( void )
     LatitudeBinary = 0;
     LongitudeBinary = 0;
 }
+#endif

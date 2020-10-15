@@ -178,6 +178,8 @@ void RtcBkupRead( uint32_t* data0, uint32_t* data1 );
  */
 void RtcProcess( void );
 
+
+
 /*!
  * \brief Computes the temperature compensation for a period of time on a
  *        specific temperature.

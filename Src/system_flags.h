@@ -39,7 +39,15 @@ typedef union {
 
       uint16_t radio_packet_received   :1;
 
-      uint16_t reserved                :11;
+      uint16_t pulse1_flag             :1;
+
+      uint16_t pulse2_flag             :1;
+
+      uint16_t lsm303agr_act           :1;
+
+      uint16_t system_active           :1;
+
+      uint16_t reserved                :7;
 
    } flag;
 
@@ -59,17 +67,13 @@ typedef union {
       bool b_downlink_frame_received;
       bool b_daily_update_received;
       bool b_config_frame_received;
-      bool b_config_traffic_frame_received;
       bool b_detection_confirmed;
-
 
    } flag;
 
 } st_sigfox_events_t;
 
-
 extern volatile st_sigfox_events_t st_sigfox_events;
-extern volatile uint8_t bufferTX[33]; //12 original
 
 
 /*************************************************************************************************/
