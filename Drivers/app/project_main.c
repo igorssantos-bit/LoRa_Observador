@@ -147,8 +147,8 @@ uint8_t au8_downlink_frame[8];
  */
 typedef enum
 {
-    LORAMAC_HANDLER_TX_ON_TIMER,
-    LORAMAC_HANDLER_TX_ON_EVENT,
+	LORAMAC_HANDLER_TX_ON_TIMER,
+	LORAMAC_HANDLER_TX_ON_EVENT,
 }LmHandlerTxEvents_t;
 
 /*!
@@ -161,9 +161,9 @@ static uint8_t AppDataBuffer[LORAWAN_APP_DATA_BUFFER_MAX_SIZE];
  */
 static LmHandlerAppData_t AppData =
 {
-    .Buffer = AppDataBuffer,
-    .BufferSize = 0,
-    .Port = 0
+		.Buffer = AppDataBuffer,
+		.BufferSize = 0,
+		.Port = 0
 };
 
 
@@ -181,39 +181,39 @@ void GetDeviceSN(void);
 
 static LmHandlerCallbacks_t LmHandlerCallbacks =
 {
-    .GetBatteryLevel = BoardGetBatteryLevel,
-    .GetTemperature = NULL,
-    .GetUniqueId = BoardGetUniqueId,
-    .GetRandomSeed = BoardGetRandomSeed,
-    .OnMacProcess = OnMacProcessNotify,
-    .OnNvmContextChange = OnNvmContextChange,
-    .OnNetworkParametersChange = OnNetworkParametersChange,
-    .OnMacMcpsRequest = OnMacMcpsRequest,
-    .OnMacMlmeRequest = OnMacMlmeRequest,
-    .OnJoinRequest = OnJoinRequest,
-    .OnTxData = OnTxData,
-    .OnRxData = OnRxData,
-    .OnClassChange= OnClassChange,
-    .OnBeaconStatusChange = OnBeaconStatusChange
+		.GetBatteryLevel = BoardGetBatteryLevel,
+		.GetTemperature = NULL,
+		.GetUniqueId = BoardGetUniqueId,
+		.GetRandomSeed = BoardGetRandomSeed,
+		.OnMacProcess = OnMacProcessNotify,
+		.OnNvmContextChange = OnNvmContextChange,
+		.OnNetworkParametersChange = OnNetworkParametersChange,
+		.OnMacMcpsRequest = OnMacMcpsRequest,
+		.OnMacMlmeRequest = OnMacMlmeRequest,
+		.OnJoinRequest = OnJoinRequest,
+		.OnTxData = OnTxData,
+		.OnRxData = OnRxData,
+		.OnClassChange= OnClassChange,
+		.OnBeaconStatusChange = OnBeaconStatusChange
 };
 
 static LmHandlerParams_t LmHandlerParams =
 {
-    .Region = ACTIVE_REGION,
-    .AdrEnable = LORAWAN_ADR_STATE,
-    .TxDatarate = LORAWAN_DEFAULT_DATARATE,
-    .PublicNetworkEnable = LORAWAN_PUBLIC_NETWORK,
-    .DutyCycleEnabled = LORAWAN_DUTYCYCLE_ON,
-    .DataBufferMaxSize = LORAWAN_APP_DATA_BUFFER_MAX_SIZE,
-    .DataBuffer = AppDataBuffer
+		.Region = ACTIVE_REGION,
+		.AdrEnable = LORAWAN_ADR_STATE,
+		.TxDatarate = LORAWAN_DEFAULT_DATARATE,
+		.PublicNetworkEnable = LORAWAN_PUBLIC_NETWORK,
+		.DutyCycleEnabled = LORAWAN_DUTYCYCLE_ON,
+		.DataBufferMaxSize = LORAWAN_APP_DATA_BUFFER_MAX_SIZE,
+		.DataBuffer = AppDataBuffer
 };
 
 static LmhpComplianceParams_t LmhpComplianceParams =
 {
-    .AdrEnabled = LORAWAN_ADR_STATE,
-    .DutyCycleEnabled = LORAWAN_DUTYCYCLE_ON,
-    .StopPeripherals = NULL,
-    .StartPeripherals = NULL,
+		.AdrEnabled = LORAWAN_ADR_STATE,
+		.DutyCycleEnabled = LORAWAN_DUTYCYCLE_ON,
+		.StopPeripherals = NULL,
+		.StartPeripherals = NULL,
 };
 
 /*!
@@ -243,94 +243,94 @@ int ProjectMain( void )
 
 	GetDeviceSN();
 
-    LmHandlerInit( &LmHandlerCallbacks, &LmHandlerParams );
+	LmHandlerInit( &LmHandlerCallbacks, &LmHandlerParams );
 
-    // The LoRa-Alliance Compliance protocol package should always be
-    // initialized and activated.
-    LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams );
+	// The LoRa-Alliance Compliance protocol package should always be
+	// initialized and activated.
+	LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams );
 
-    LmHandlerJoin( );
+	LmHandlerJoin( );
 
-    fnAPP_Init();
+	fnAPP_Init();
 
-    IsMacProcessPending = 0;
+	IsMacProcessPending = 0;
 
-    flag_rejoin = 0;
-    while( 1 )
-    {
+	flag_rejoin = 0;
+	while( 1 )
+	{
 
-       if (flag_rejoin){
-    	  flag_rejoin = 0;
-    	  ResetMacParameters();
-	      LmHandlerInit( &LmHandlerCallbacks, &LmHandlerParams );
-	      LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams );
-	      LmHandlerJoin( );
-	      //printf("rejoin\r\n");
-        }
+		if (flag_rejoin){
+			flag_rejoin = 0;
+			ResetMacParameters();
+			LmHandlerInit( &LmHandlerCallbacks, &LmHandlerParams );
+			LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams );
+			LmHandlerJoin( );
+			//printf("rejoin\r\n");
+		}
 
-        LmHandlerProcess( );
+		LmHandlerProcess( );
 
-        fnAPP_Process_Events();
-    	//GpioToggle(&Led1);
+		fnAPP_Process_Events();
+		//GpioToggle(&Led1);
 
-    	switch (IsMacProcessPending){
+		switch (IsMacProcessPending){
 
-    	// Modo normal: pode dormir o processador
-    	case LORA_IDLE:{
-      	   if (!LmHandlerIsBusy()){
-    	     //HAL_PWR_EnterSLEEPMode(PWR_LOWPOWERREGULATOR_ON,PWR_STOPENTRY_WFI);
-      		  //GpioWrite( &Led1, 1 );
-      		  if (st_system_status.u8_state_machine_state == APP_STATE_RUN){
-    	  	     LpmEnterStopMode();
-    	         LpmExitStopMode();
+		// Modo normal: pode dormir o processador
+		case LORA_IDLE:{
+			if (!LmHandlerIsBusy()){
+				//HAL_PWR_EnterSLEEPMode(PWR_LOWPOWERREGULATOR_ON,PWR_STOPENTRY_WFI);
+				//GpioWrite( &Led1, 1 );
+				if (st_system_status.u8_state_machine_state == APP_STATE_RUN){
+					LpmEnterStopMode();
+					LpmExitStopMode();
 
-      		  }
-    	   }
-    	}
-    	break;
+				}
+			}
+		}
+		break;
 
-        // Modo MAC process: não pode entrar em sleep
-    	case LORA_PROCESSING:{
-    		//CRITICAL_SECTION_BEGIN( );
-    	}
-    	break;
+		// Modo MAC process: não pode entrar em sleep
+		case LORA_PROCESSING:{
+			//CRITICAL_SECTION_BEGIN( );
+		}
+		break;
 
-    	// Modo Timeout: wait timeout
-    	case LORA_TIMEOUT:{
-    	   if (fnTIMESTAMP_Get_Timestamp_Counter_Seconds() - timeOutMacBusy > 6){
-    	      IsMacProcessPending = 0;
-    	      // Reconfigure clock to low power
-    	      HAL_RCC_DeInit();
-    	      for (uint16_t atraso= 0; atraso < 10000; atraso++){
-    	         __ASM volatile ("nop");
-    	      }
+		// Modo Timeout: wait timeout
+		case LORA_TIMEOUT:{
+			if (fnTIMESTAMP_Get_Timestamp_Counter_Seconds() - timeOutMacBusy > 6){
+				IsMacProcessPending = 0;
+				// Reconfigure clock to low power
+				HAL_RCC_DeInit();
+				for (uint16_t atraso= 0; atraso < 10000; atraso++){
+					__ASM volatile ("nop");
+				}
 
-    	      SystemClockConfig_MSI();
-    	      //fltTime = AJUSTE_TIMER_CLOCK_LENTO;
-              for (uint16_t atraso= 0; atraso < 10000; atraso++){
-    	         __ASM volatile ("nop");
-    	      }
+				SystemClockConfig_MSI();
+				//fltTime = AJUSTE_TIMER_CLOCK_LENTO;
+				for (uint16_t atraso= 0; atraso < 10000; atraso++){
+					__ASM volatile ("nop");
+				}
 
-       	      //MX_USART1_UART_DeInit();
-       	      //MX_I2C1_DeInit();
-       	      BoardDeInitPeriph();
-       	      BoardInitPeriph();
+				//MX_USART1_UART_DeInit();
+				//MX_I2C1_DeInit();
+				BoardDeInitPeriph();
+				BoardInitPeriph();
 
-    	      //CRITICAL_SECTION_END( );
-       	      // xSemaphoreGive();
-    	   }
-    	}
-    	break;
+				//CRITICAL_SECTION_END( );
+				// xSemaphoreGive();
+			}
+		}
+		break;
 
-    	// Modo erro
-    	default:{
-    		// goes to Mode Timeout
-    		IsMacProcessPending = 2;
-    		timeOutMacBusy = fnTIMESTAMP_Get_Timestamp_Counter_Seconds();
-    	}
-    	break;
-    	}
-    }
+		// Modo erro
+		default:{
+			// goes to Mode Timeout
+			IsMacProcessPending = 2;
+			timeOutMacBusy = fnTIMESTAMP_Get_Timestamp_Counter_Seconds();
+		}
+		break;
+		}
+	}
 }
 
 
@@ -345,20 +345,20 @@ int ProjectMain( void )
  * **/
 static void OnMacProcessNotify( void )
 {
-    IsMacProcessPending = 1;
-    fnDEBUG_Const_String("############### MAC process Notify  ###############\r\n");
-    LmHandlerProcess();
+	IsMacProcessPending = 1;
+	fnDEBUG_Const_String("############### MAC process Notify  ###############\r\n");
+	LmHandlerProcess();
 }
 
 static void OnNvmContextChange( LmHandlerNvmContextStates_t state )
 {
-    DisplayNvmContextChange( state );
+	DisplayNvmContextChange( state );
 	//fnDEBUG_Const_String("\r\n------ nvmcontextchange ---- \r\n");
 }
 
 static void OnNetworkParametersChange( CommissioningParams_t* params )
 {
-    DisplayNetworkParametersUpdate( params );
+	DisplayNetworkParametersUpdate( params );
 	//fnDEBUG_Const_String("\r\n------ networkparameterschange ---- \r\n");
 }
 
@@ -371,35 +371,35 @@ static void OnMacMcpsRequest( LoRaMacStatus_t status, McpsReq_t *mcpsReq )
 {
 	IsMacProcessPending = 1;
 	fnDEBUG_Const_String("\r\n------ macmcpsrequest ---- \r\n");
-    DisplayMacMcpsRequestUpdate( status, mcpsReq );
+	DisplayMacMcpsRequestUpdate( status, mcpsReq );
 
 }
 
 static void OnMacMlmeRequest( LoRaMacStatus_t status, MlmeReq_t *mlmeReq )
 {
 	fnDEBUG_Const_String("\r\n------ MACMLMEREQUEST ---- \r\n");
-    DisplayMacMlmeRequestUpdate( status, mlmeReq );
+	DisplayMacMlmeRequestUpdate( status, mlmeReq );
 
 }
 
 static void OnJoinRequest( LmHandlerJoinParams_t* params )
 {
-    //DisplayJoinRequestUpdate( params );
-    if( params->Status == LORAMAC_HANDLER_ERROR )
-    {
-        LmHandlerJoin( );
-    }
-    else
-    {
-        LmHandlerRequestClass( LORAWAN_DEFAULT_CLASS );
-    }
+	//DisplayJoinRequestUpdate( params );
+	if( params->Status == LORAMAC_HANDLER_ERROR )
+	{
+		LmHandlerJoin( );
+	}
+	else
+	{
+		LmHandlerRequestClass( LORAWAN_DEFAULT_CLASS );
+	}
 }
 
 static void OnTxData( LmHandlerTxParams_t* params )
 {
 	fnDEBUG_Const_String("\r\n------ TRANSMITINDO ---- \r\n");
-    DisplayTxUpdate( params );
-    /*
+	DisplayTxUpdate( params );
+	/*
 	fnDEBUG_8bit_Hex("MCPS Confirm: 0x", params->IsMcpsConfirm, "\r\n");
 	fnDEBUG_8bit_Hex("MAC Event Status: 0x", params->Status, "\r\n");
 	fnDEBUG_8bit_Hex("Canal: 0x", params->Channel, "\r\n");
@@ -408,81 +408,81 @@ static void OnTxData( LmHandlerTxParams_t* params )
 	fnDEBUG_8bit_Hex("ACK de MSG: 0x", params->MsgType, "\r\n"); //0 sem confirmação
 	fnDEBUG_8bit_Hex("ACK: 0x", params->AckReceived, "\r\n");
 	fnDEBUG_32bit_Hex("Counter: 0x",params->UplinkCounter, "\r\n");
-    */
-    fnDEBUG_Const_String("\r\n------ ------ ---------- \r\n");
+	 */
+	fnDEBUG_Const_String("\r\n------ ------ ---------- \r\n");
 	// Indicador de que a camada MAC finalizando a sua tarefa
 	// Necessario temporizar para permitir a completa finalização
 	IsMacProcessPending = 2;  //
-    timeOutMacBusy = fnTIMESTAMP_Get_Timestamp_Counter_Seconds();
+	timeOutMacBusy = fnTIMESTAMP_Get_Timestamp_Counter_Seconds();
 
 
 }
 
 static void OnRxData( LmHandlerAppData_t* appData, LmHandlerRxParams_t* params )
 {
-    //DisplayRxUpdate2( appData, params );
+	//DisplayRxUpdate2( appData, params );
 	DisplayRxUpdate( appData, params );
-    switch( appData->Port )
-    {
-    case 1:
-    case LORAWAN_APP_PORT:
-        {
-            // PROCESSAR DADO QUE CHEGA
-             st_sigfox_events.flag.b_downlink_frame_received = true;
-             memcpy(au8_downlink_frame2,appData->Buffer,16);
-             //1c05fa00120dae07 --> testar esse frame
-             //au8_downlink_frame2[0] = 0x30; au8_downlink_frame2[0] = 0x;
-             fnDEBUG_Const_String("RX = ");
-             for (uint8_t cnt=0; cnt<8; cnt++){
-            	 au8_downlink_frame[cnt] = fnConvert_Ascii_To_4bitHex (au8_downlink_frame2[cnt*2]) << 4;
-		         au8_downlink_frame[cnt] |= fnConvert_Ascii_To_4bitHex (au8_downlink_frame2[(cnt*2) + 1]);
-		         fnDEBUG_8bit_Hex("", au8_downlink_frame[cnt], " ");
-             }
-             fnDEBUG_Const_String("\r\n");
-        }
-        break;
-    default:
-        break;
-    }
+	switch( appData->Port )
+	{
+	case 1:
+	case LORAWAN_APP_PORT:
+	{
+		// PROCESSAR DADO QUE CHEGA
+		st_sigfox_events.flag.b_downlink_frame_received = true;
+		memcpy(au8_downlink_frame2,appData->Buffer,16);
+		//1c05fa00120dae07 --> testar esse frame
+		//au8_downlink_frame2[0] = 0x30; au8_downlink_frame2[0] = 0x;
+		fnDEBUG_Const_String("RX = ");
+		for (uint8_t cnt=0; cnt<8; cnt++){
+			au8_downlink_frame[cnt] = fnConvert_Ascii_To_4bitHex (au8_downlink_frame2[cnt*2]) << 4;
+			au8_downlink_frame[cnt] |= fnConvert_Ascii_To_4bitHex (au8_downlink_frame2[(cnt*2) + 1]);
+			fnDEBUG_8bit_Hex("", au8_downlink_frame[cnt], " ");
+		}
+		fnDEBUG_Const_String("\r\n");
+	}
+	break;
+	default:
+		break;
+	}
 
 }
 
 static void OnClassChange( DeviceClass_t deviceClass )
 {
-    DisplayClassUpdate( deviceClass );
+	DisplayClassUpdate( deviceClass );
 
-    // Inform the server as soon as possible that the end-device has switched to ClassB
-    LmHandlerAppData_t appData =
-    {
-        .Buffer = NULL,
-        .BufferSize = 0,
-        .Port = 0
-    };
-    LmHandlerSend( &appData, LORAMAC_HANDLER_UNCONFIRMED_MSG );
+	// Inform the server as soon as possible that the end-device has switched to ClassB
+	LmHandlerAppData_t appData =
+	{
+			.Buffer = NULL,
+			.BufferSize = 0,
+			.Port = 0
+	};
+	LmHandlerSend( &appData, LORAMAC_HANDLER_UNCONFIRMED_MSG );
 }
 
 static void OnBeaconStatusChange( LoRaMAcHandlerBeaconParams_t* params )
 {
-    switch( params->State )
-    {
-        case LORAMAC_HANDLER_BEACON_RX:
-        {
-            //TimerStart( &LedBeaconTimer );
-            break;
-        }
-        case LORAMAC_HANDLER_BEACON_LOST:
-        case LORAMAC_HANDLER_BEACON_NRX:
-        {
-            //TimerStop( &LedBeaconTimer );
-            break;
-        }
-        default:
-        {
-            break;
-        }
-    }
+	switch( params->State )
+	{
+	case LORAMAC_HANDLER_BEACON_RX:
+	{
+		//TimerStart( &LedBeaconTimer );
+		break;
+	}
+	case LORAMAC_HANDLER_BEACON_LOST:
+	case LORAMAC_HANDLER_BEACON_NRX:
+	{
+		//TimerStop( &LedBeaconTimer );
+		break;
+	}
+	default:
+	{
+		break;
+	}
+	}
 
-    DisplayBeaconUpdate( params );
+	DisplayBeaconUpdate( params );
 }
 
 
@@ -495,8 +495,8 @@ void GetDeviceSN(void)
 	uint32_t	dev_id_word0 = HAL_GetUIDw0();
 	uint32_t	dev_id_word1 = HAL_GetUIDw1();
 	uint32_t	dev_id_word2 = HAL_GetUIDw2();
-//007b00643068380f
-//3068380f
+	//007b00643068380f
+	//3068380f
 	CommissioningParams.DevEui[0] = (uint8_t)(dev_id_word2>>24);
 	CommissioningParams.DevEui[1] = (uint8_t)(dev_id_word2>>16)+(dev_id_word0>>16);
 	CommissioningParams.DevEui[2] = (uint8_t)(dev_id_word2>>8);
@@ -507,12 +507,12 @@ void GetDeviceSN(void)
 	CommissioningParams.DevEui[7] = (uint8_t)(dev_id_word0>>24);
 
 	CommissioningParams.DevAddr = dev_id_word2;
-/*
+	/*
 	for (int cnt = 0; cnt < 4; cnt++){
 	   CommissioningParams.DevAddr <<= 8;
 	   CommissioningParams.DevAddr |= CommissioningParams.DevEui[cnt] ;
 	}
-	*/
+	 */
 }
 
 
