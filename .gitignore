@@ -1,0 +1,24 @@
+
+
+#Build Directories
+[Dd]ebug/
+[Rr]elease/
+
+
+#Build Results
+*.o
+*.su
+*.log
+*.d
+*.eep
+*.elf
+*.hex
+*.map
+*.srec
+*.prefs
+*.xml
+.ld
+.launch
+
+# Eclipse CDT project files
+.settings/
