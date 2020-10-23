@@ -72,38 +72,35 @@
 /*************************************************************************************************/
 /*    PRIVATE PROTOTYPES                                                                         */
 /*************************************************************************************************/
-// IGOR
-
-// OLD
 uint8_t fnAPP_STATE_Init ( uint8_t event );
 uint8_t fnAPP_STATE_Check_Config ( uint8_t event );
-uint8_t fnAPP_STATE_Run ( uint8_t event );
-uint8_t fnAPP_STATE_Detection ( uint8_t event );
 uint8_t fnAPP_STATE_Configuration ( uint8_t event );
-uint8_t fnAPP_STATE_Confirming_Detection ( uint8_t event );
+uint8_t fnAPP_STATE_Run ( uint8_t event );
+uint8_t fnAPP_STATE_BLE_TX ( uint8_t event );
+uint8_t fnAPP_STATE_BLE_RX ( uint8_t event );
+uint8_t fnAPP_STATE_Send_BLE_Data ( uint8_t event );
 uint8_t fnAPP_STATE_Wait_Transmission ( uint8_t event );
 
 void fnAPP_STATE_ENTER_Init ( void );
 void fnAPP_STATE_ENTER_Check_Config ( void );
-void fnAPP_STATE_ENTER_Run ( void );
-void fnAPP_STATE_ENTER_Detection ( void );
 void fnAPP_STATE_ENTER_Configuration ( void );
-void fnAPP_STATE_ENTER_Confirming_Detection ( void );
+void fnAPP_STATE_ENTER_Run ( void );
+void fnAPP_STATE_ENTER_BLE_TX ( void );
+void fnAPP_STATE_ENTER_BLE_RX ( void );
+void fnAPP_STATE_ENTER_Send_BLE_Data ( void );
 void fnAPP_STATE_ENTER_Wait_Transmission ( void );
 
 void fnAPP_STATE_EXIT_Init ( void );
 void fnAPP_STATE_EXIT_Check_Config ( void );
-void fnAPP_STATE_EXIT_Run ( void );
-void fnAPP_STATE_EXIT_Detection ( void );
 void fnAPP_STATE_EXIT_Configuration ( void );
-void fnAPP_STATE_EXIT_Confirming_Detection ( void );
+void fnAPP_STATE_EXIT_Run ( void );
+void fnAPP_STATE_EXIT_BLE_TX ( void );
+void fnAPP_STATE_EXIT_BLE_RX ( void );
+void fnAPP_STATE_EXIT_Send_BLE_Data ( void );
 void fnAPP_STATE_EXIT_Wait_Transmission ( void );
 
-void fnLED_Change_Effect ( void );
-
-void fnAPP_STATE_Axsigfox_Downlink ( uint8_t * pu8_message_received, uint8_t u8_size );
 void fnAPP_STATE_System_Reconfiguration ( en_sigmais_downlink_frame_type_t en_sigmais_downlink_frame_type );
-void fnAPP_STATE_Detection_Confirmed ( void * pv_null );
+// todo: verificar necessidade
 bool fnAPP_STATE_Is_At_Working_Hour ( uint8_t u8_actual_hour );
 void fnAPP_STATE_New_Day_Event ( void );
 en_app_state_t fnAPP_STATE_Check_Day_Event ( en_app_state_t en_app_state );
@@ -111,7 +108,6 @@ en_app_state_t fnAPP_STATE_Check_Config_Report_Event ( en_app_state_t en_app_sta
 
 void fnAPP_STATE_State_Timeout ( void * pv_null );
 void fnSTATE_MACHINE_Keep_Alive( void * pv_null );
-//void fnSTATE_MACHINE_Confirmation( void * pv_null );
 void fnSTATE_MACHINE_Info_Frame_Horimetro( void * pv_null );
 void print_device_data(void);
 void printDevEUI(void);
@@ -120,55 +116,48 @@ void printDevAddr(void);
 /*************************************************************************************************/
 /*    VARIABLES                                                                                  */
 /*************************************************************************************************/
-uint32_t timerTxSeconds = 0, counterState = 0, timeMagOn = 0;
-uint8_t MagInitialized = 0;
+extern UART_HandleTypeDef huart1;
+uint32_t timerTxSeconds = 0, counterState = 0;
 uint8_t first_package_of_day = true;
-
-//extern float fltTime;
 
 /* Based on en_app_state_t enumeration */ 
 const st_state_machine_functions_t st_app_state_machine_functions[] = {
 
-		{  fnAPP_STATE_Init,                   fnAPP_STATE_ENTER_Init,                 fnAPP_STATE_EXIT_Init                 },
-		{  fnAPP_STATE_Check_Config,           fnAPP_STATE_ENTER_Check_Config,         fnAPP_STATE_EXIT_Check_Config         },
-		{  fnAPP_STATE_Run,                    fnAPP_STATE_ENTER_Run,                  fnAPP_STATE_EXIT_Run                  },
-		{  fnAPP_STATE_Detection,              fnAPP_STATE_ENTER_Detection,            fnAPP_STATE_EXIT_Detection            },
-		{  fnAPP_STATE_Configuration,          fnAPP_STATE_ENTER_Configuration,        fnAPP_STATE_EXIT_Configuration        },
-		{  fnAPP_STATE_Confirming_Detection,   fnAPP_STATE_ENTER_Confirming_Detection, fnAPP_STATE_EXIT_Confirming_Detection },
-		{  fnAPP_STATE_Wait_Transmission,      fnAPP_STATE_ENTER_Wait_Transmission,    fnAPP_STATE_EXIT_Wait_Transmission    },
-
+		{  fnAPP_STATE_Init,           		fnAPP_STATE_ENTER_Init,             	fnAPP_STATE_EXIT_Init           		},
+		{ 	fnAPP_STATE_Check_Config,			fnAPP_STATE_ENTER_Check_Config, 			fnAPP_STATE_EXIT_Check_Config			},
+		{  fnAPP_STATE_Configuration,  		fnAPP_STATE_ENTER_Configuration,   		fnAPP_STATE_EXIT_Configuration		},
+		{  fnAPP_STATE_Run,             		fnAPP_STATE_ENTER_Run,              	fnAPP_STATE_EXIT_Run            		},
+		{  fnAPP_STATE_BLE_TX,					fnAPP_STATE_ENTER_BLE_TX,    				fnAPP_STATE_EXIT_BLE_TX					},
+		{  fnAPP_STATE_BLE_RX,      			fnAPP_STATE_ENTER_BLE_RX,    				fnAPP_STATE_EXIT_BLE_RX					},
+		{  fnAPP_STATE_Send_BLE_Data,   		fnAPP_STATE_ENTER_Send_BLE_Data,			fnAPP_STATE_EXIT_Send_BLE_Data		},
+		{  fnAPP_STATE_Wait_Transmission,	fnAPP_STATE_ENTER_Wait_Transmission,	fnAPP_STATE_EXIT_Wait_Transmission	},
 };
 
 st_state_machine_desc_t st_app_state_machine_desc;
 uint16_t u16_app_state_machine_data;
-
-
-st_timer_index_t st_timer_confirm_detection;
 st_timer_index_t st_timer_check_config_timeout;
-
 st_timer_index_t st_timer_confirmation_frame;
 st_timer_index_t st_timer_keep_alive;
+st_timer_index_t st_timer_confirm_detection;
 st_timer_index_t st_timer_periodic_transmission;
-
 uint8_t u8_detection_transmit_counter;
 
-
-
-//en_module_type_t en_actual_module_type;
+//
+//
+//
+////en_module_type_t en_actual_module_type;
+//uint8_t u8_actual_strong_max_sensivity = 9;
 
 en_app_state_t en_next_app_state;
 
 bool b_mag_trigger = false;
 bool b_next_state = false;
 
-uint8_t u8_actual_strong_max_sensivity = 9;
-
 uint8_t u8_config_report_transmition_counter;
 uint8_t u8_configuration_transmition_counter;
 
-// valores em minutos
 const uint16_t u16_config_report_timer_table[4] = {  
-		00,                                                 //desabilita
+		00,
 		15,
 		60,
 		360,
@@ -183,9 +172,7 @@ void fnAPP_STATE_MACHINE_Init ( void ) {
 	st_app_state_machine_desc.pst_functions = (st_state_machine_functions_t*)&st_app_state_machine_functions[0];
 	fnSTATE_Machine_Init( &st_app_state_machine_desc );
 	fnCOMM_SIGMAIS_Donwlink_Frame_Set_Callback ( fnAPP_STATE_System_Reconfiguration );
-
 	st_sigfox_events.u16_all_flags = 0;
-
 	return;
 
 }
@@ -194,7 +181,6 @@ void fnAPP_STATE_MACHINE_Init ( void ) {
 void fnAPP_STATE_Machine ( en_event_t event ) {
 
 	fnSTATE_Machine( &st_app_state_machine_desc, event );
-
 	return;
 
 }
@@ -227,89 +213,21 @@ void fnAPP_STATE_ENTER_Check_Config ( void ) {
 
 	BoardDeInitPeriph();
 	BoardInitPeriph();
-	//fnDEBUG_Const_String("Reconfigurado\r\n");
 	counterState = 0;
 	timerTxSeconds = fnTIMESTAMP_Get_Timestamp_Counter_Seconds();
 	fnCOMM_SIGMAIS_Send_Config_Report_Frame ( );
 
 
 	fnTIMER_Start( &st_timer_check_config_timeout,
-			//MS_TO_TICKS( 60000 ),  //
-			MS_TO_TICKS( 120000 ),  //
+			MS_TO_TICKS( 120000 ),
 			TIMER_TYPE_CONTINUOUS,
 			fnAPP_STATE_State_Timeout,
 			NULL );
 
-
-	//variavel global somente no arquivo app_state_machine.c
 	u8_config_report_transmition_counter = 1;
 
 	return;
 }
-
-void fnAPP_STATE_ENTER_Run ( void ) {
-	fnDEBUG_Const_String("fnAPP_Run\r\n");
-	st_system_status.u8_state_machine_state = APP_STATE_RUN;
-	//TODO: verificar se este estado deve ser mantido
-	fnTIMESTAMP_Start_Horimetro( EN_IDLE_TIME );
-
-	return;
-}
-
-void fnAPP_STATE_ENTER_Detection ( void ) {
-
-	un_system_flags.flag.system_active = 1;
-
-	st_system_status.u8_state_machine_state = APP_STATE_DETECTION;
-	if(en_next_app_state == APP_STATE_DETECTION)
-		return;
-
-	st_system_status.u32_event_timestamp = fnTIMESTAMP_Get_Updated_Timestamp();
-	timerTxSeconds = fnTIMESTAMP_Get_Timestamp_Counter_Seconds();
-
-	fnTIMESTAMP_Start_Horimetro( EN_USED_TIME );
-
-	// Atualiza o tempo com o tempo de "Confirming_Detection"
-	fnTIMESTAMP_Update_Horimetro_Used_Counter(fnTIMESTAMP_Covert_Time_Bitfield_Into_Secs( (st_sigmais_time_byte_bitfield_t *) &st_system_status.st_sigmais_detection_debounce  ) + 5);
-
-	// Incrementa o contador de contagem
-	st_system_status.u32_machine_on++;
-	fnDEBUG_32bit_Value("ligado = ", st_system_status.u32_machine_on , " vezes");
-
-
-	fnDEBUG_Const_String("fnAPP_Detection\r\n");
-	//st_system_status.b_detection_status = fnSENSORS_Has_Detection();
-	st_system_status.b_detection_status = un_system_flags.flag.lsm303agr_act;
-	if ( st_system_status.b_data_processed ){
-		// transmissao por eventos
-		if (first_package_of_day){
-			first_package_of_day = false;
-			fnCOMM_SIGMAIS_Send_Info_Frame_Horimetro();
-		}
-		else{
-			fnCOMM_SIF_Send_Horimetro_Pulsimetro();
-		}
-
-		u8_detection_transmit_counter = 1;
-		/*
-      if( st_timer_confirmation_frame.b_busy ){
-         fnTIMER_Stop( st_timer_confirmation_frame.u8_index );
-      }
-		 */
-		//TODO: garantir um gap de 6s entre transmissoes, sob pena de ocorrer radio busy
-
-		/*
-      fnTIMER_Start( &st_timer_confirmation_frame,
-      MS_TO_TICKS(  fnTIMESTAMP_Covert_Time_Bitfield_Into_Secs(  (st_sigmais_time_byte_bitfield_t *) &st_system_status.st_sigmais_confirmation_time ) * 1000 ),
-      TIMER_TYPE_CONTINUOUS,
-      fnSTATE_MACHINE_Confirmation,
-      NULL );
-		 */
-
-	}
-	return;
-}
-
 
 void fnAPP_STATE_ENTER_Configuration ( void ) {
 
@@ -318,7 +236,6 @@ void fnAPP_STATE_ENTER_Configuration ( void ) {
 
 	HAL_RCC_DeInit();
 	SystemClockConfig_HighSpeed();
-	//fltTime = AJUSTE_TIMER_CLOCK_RAPIDO;
 	for (uint16_t atraso= 0; atraso < 15000; atraso++){
 		__ASM volatile ("nop");
 	}
@@ -335,20 +252,28 @@ void fnAPP_STATE_ENTER_Configuration ( void ) {
 	return;
 }
 
-void fnAPP_STATE_ENTER_Confirming_Detection ( void ) {
 
-	st_system_status.u8_state_machine_state = APP_STATE_CONFIRMING_DETECTION;
-	fnDEBUG_Const_String("fnAPP_Confirming_detection\r\n");
+void fnAPP_STATE_ENTER_Run ( void ) {
+	fnDEBUG_Const_String("fnAPP_Run\r\n");
+	st_system_status.u8_state_machine_state = APP_STATE_RUN;
 
-	//st_system_status.b_detection_status = fnSENSORS_Has_Detection();
-	//por interrupção
-	st_system_status.b_detection_status = un_system_flags.flag.lsm303agr_act;
-	fnTIMER_Start( &st_timer_confirm_detection,
-			MS_TO_TICKS((fnTIMESTAMP_Covert_Time_Bitfield_Into_Secs( (st_sigmais_time_byte_bitfield_t *) &st_system_status.st_sigmais_detection_debounce  ) + 5) * 1000 ),
-			TIMER_TYPE_SINGLE,
-			fnAPP_STATE_Detection_Confirmed,
-			NULL );
+	fnTIMESTAMP_Start_Horimetro( EN_IDLE_TIME );
 
+	return;
+}
+
+void fnAPP_STATE_ENTER_BLE_TX ( void ) {
+	st_system_status.u8_state_machine_state = APP_STATE_BLE_TX;
+	return;
+}
+
+void fnAPP_STATE_ENTER_BLE_RX ( void ) {
+	st_system_status.u8_state_machine_state = APP_STATE_BLE_RX;
+	return;
+}
+
+void fnAPP_STATE_ENTER_Send_BLE_Data ( void ) {
+	st_system_status.u8_state_machine_state = APP_STATE_SEND_BLE_DATA;
 	return;
 }
 
@@ -389,22 +314,6 @@ uint8_t fnAPP_STATE_Check_Config ( uint8_t event ) {
 	if (counterState > 50){
 		return APP_STATE_RUN;
 	}
-	/*
-   if( st_sigfox_events.flag.b_config_frame_received ) {
-	   fnDEBUG_Const_String("config frame recebido\r\n");
-      st_sigfox_events.flag.b_config_frame_received = false;
-
- 	 // if (!LoRaMacIsBusy()){
-         if( u8_config_report_transmition_counter <= 1 ) {
-            fnCOMM_SIGMAIS_Send_Config_Report_Frame ( );
-            u8_config_report_transmition_counter++;
-         } else {
-            fnCOMM_SIGMAIS_Send_Error_Frame ( EN_SIGMAIS_ERROR_RECEIVE, EN_SIGMAIS_WRONG_FRAME );
-            b_next_state = true;
-         }
- 	 // }
-   }
-	 */
 
 	if( st_sigfox_events.flag.b_downlink_frame_received ) {
 		fnDEBUG_Const_String("donwlink frame recebido\r\n");
@@ -428,19 +337,6 @@ uint8_t fnAPP_STATE_Check_Config ( uint8_t event ) {
 
 	}
 
-	/*
-   if( st_sigfox_events.flag.b_daily_update_received ) {
-	  fnDEBUG_Const_String("daily frame recebido\r\n");
-      st_sigfox_events.flag.b_daily_update_received = false;
-      if( st_system_status.b_configuration_pending ) {
-         return APP_STATE_CONFIGURATION;
-      }
-      else {
-         b_next_state = true;
-      }
-   }
-	 */
-
 	if( b_next_state == true ) {
 		b_next_state = false;
 		return en_next_app_state;
@@ -449,93 +345,6 @@ uint8_t fnAPP_STATE_Check_Config ( uint8_t event ) {
 	return APP_STATE_CHECK_CONFIG;
 
 }
-
-
-uint8_t fnAPP_STATE_Run ( uint8_t event ) {
-	en_app_state_t  check_day_event_return;
-	uint8_t u8_actual_hour = fnTIMESTAMP_Get_Day_Hour();
-
-	switch ( event ) {
-
-	case EVENT_MAG_THRESHOLD: {
-
-		b_mag_trigger = true;
-		en_next_app_state = APP_STATE_RUN;
-		return APP_STATE_CHECK_CONFIG;
-	}
-
-	default: {
-		break;
-	}
-	}
-
-	bool b_is_working_hour = fnAPP_STATE_Is_At_Working_Hour( u8_actual_hour );
-	if( b_is_working_hour && (un_system_flags.flag.lsm303agr_act == 1) ) {
-		return APP_STATE_CONFIRMING_DETECTION;; //return APP_STATE_DETECTION --> eliminar o debounce?;
-	}
-
-	check_day_event_return = fnAPP_STATE_Check_Day_Event ( APP_STATE_RUN );
-	if (check_day_event_return == APP_STATE_RUN){
-		return fnAPP_STATE_Check_Config_Report_Event ( APP_STATE_RUN);
-	}
-
-	return check_day_event_return;
-}
-
-
-uint8_t fnAPP_STATE_Detection ( uint8_t event ) {
-	en_app_state_t  check_day_event_return;
-
-
-
-	en_next_app_state = APP_STATE_WAIT_TRANSMISSION; //APP_STATE_INIT;
-
-	switch ( event ) {
-
-	case EVENT_MAG_THRESHOLD: {
-
-		RtcDelayMs(20000);
-
-		b_mag_trigger = true;
-
-		if( st_timer_confirmation_frame.b_busy ){
-			fnTIMER_Stop( st_timer_confirmation_frame.u8_index );
-		}
-
-		en_next_app_state = APP_STATE_DETECTION;
-		return APP_STATE_CHECK_CONFIG;
-	}
-
-	default: {
-		break;
-	}
-
-	}
-
-	/*
-   // DEBOUNCE DO SENSOR PARA O ESTADO DESLIGADO É FEITO EM SENSORS.C
-   if( !fnSENSORS_Has_Detection( ) ) {
-      if ( (fnTIMESTAMP_Get_Timestamp_Counter_Seconds() - timerTxSeconds)  >= TIME_TO_WAIT_NEW_TRANSMISSION){  //aguarda 15s antes de sair do estado detection
-          return APP_STATE_WAIT_TRANSMISSION;
-      }
-   }
-	 */
-	if( un_system_flags.flag.lsm303agr_act == 0  ) {
-		if ( (fnTIMESTAMP_Get_Timestamp_Counter_Seconds() - timerTxSeconds)  >= TIME_TO_WAIT_NEW_TRANSMISSION){  //aguarda 15s antes de sair do estado detection
-			return APP_STATE_WAIT_TRANSMISSION;
-		}
-	}
-
-
-	check_day_event_return = fnAPP_STATE_Check_Day_Event ( APP_STATE_DETECTION );
-	if (check_day_event_return == APP_STATE_DETECTION){
-		if ( (fnTIMESTAMP_Get_Timestamp_Counter_Seconds() - timerTxSeconds)  >= TIME_TO_WAIT_NEW_TRANSMISSION){  //aguarda 10s antes de permitir a saída do estado detection
-			return fnAPP_STATE_Check_Config_Report_Event ( APP_STATE_DETECTION);
-		}
-	}
-	return check_day_event_return;
-}
-
 
 uint8_t fnAPP_STATE_Configuration ( uint8_t event ) {
 
@@ -568,80 +377,48 @@ uint8_t fnAPP_STATE_Configuration ( uint8_t event ) {
 		st_sigfox_events.flag.b_config_frame_received = false;
 		fnSENSORS_Config ( );
 
-		u8_actual_strong_max_sensivity = st_system_status.u8_strong_mag_sensivity;
-		//fnSENSORS_Mag_Threshold();
+		// todo: arrumar para configurar o LoRa
+		//u8_actual_strong_max_sensivity = st_system_status.u8_strong_mag_sensivity;
 
-		//if( st_system_status.b_configuration_pending ) {
-		//fnCOMM_SIGMAIS_Request_Downlink_Frame ( );
-		//} else {
 		b_next_state = true;
-		//}
 	}
 
 	if( b_next_state == true ) {
 		b_next_state = false;
-		//if( st_system_status.b_calibration_authorized && b_mag_trigger ) {
-		//   st_system_status.b_calibration_authorized = false;
-		//  return APP_STATE_CALIBRATION;
-		//} else {
 		return en_next_app_state;
-		//}
 	}
 
 	return APP_STATE_CONFIGURATION;
 }
 
-uint8_t fnAPP_STATE_Confirming_Detection ( uint8_t event ) {
 
+uint8_t fnAPP_STATE_Run ( uint8_t event ) {
+	en_app_state_t  check_day_event_return;
+	uint8_t u8_actual_hour = fnTIMESTAMP_Get_Day_Hour();
 
-	switch ( event ) {
-
-	case EVENT_MAG_THRESHOLD: {
-
-		b_mag_trigger = true;
-
-		if( st_timer_confirm_detection.b_busy ){
-			fnTIMER_Stop( st_timer_confirm_detection.u8_index );
-		}
-
-		en_next_app_state = APP_STATE_RUN;
-		return APP_STATE_CHECK_CONFIG;
-
+	check_day_event_return = fnAPP_STATE_Check_Day_Event ( APP_STATE_RUN );
+	if (check_day_event_return == APP_STATE_RUN){
+		return fnAPP_STATE_Check_Config_Report_Event ( APP_STATE_RUN);
 	}
 
-	default: {
-		break;
-	}
-	}
-
-	if( st_sigfox_events.flag.b_detection_confirmed ) {
-		st_sigfox_events.flag.b_detection_confirmed = false;
-
-		return APP_STATE_DETECTION;
-	}
-
-	//if( !fnSENSORS_Has_Detection() ) {
-		if (un_system_flags.flag.lsm303agr_act == 0){
-
-			if( st_timer_confirm_detection.b_busy ){
-				fnTIMER_Stop( st_timer_confirm_detection.u8_index );
-			}
-
-			return APP_STATE_RUN;
-
-		} else {
-
-			return APP_STATE_CONFIRMING_DETECTION;
-		}
-
+	return check_day_event_return;
 }
 
 uint8_t fnAPP_STATE_Wait_Transmission ( uint8_t event ) {
-	//fnDEBUG_Const_String("fnAPP_Wait_Transmission\n");
+
+//	// transmissao por eventos
+//			if (first_package_of_day){
+//				first_package_of_day = false;
+//				fnCOMM_SIGMAIS_Send_Info_Frame_Horimetro();
+//			}
+//			else{
+//				fnCOMM_SIF_Send_Horimetro_Pulsimetro();
+//			}
 
 	counterState++;
 	if (counterState > 15)
 		return APP_STATE_RUN;
+
 	return APP_STATE_WAIT_TRANSMISSION;
 }
 
@@ -674,70 +451,7 @@ void fnAPP_STATE_EXIT_Run ( void ) {
 	return;
 }
 
-void fnAPP_STATE_EXIT_Detection ( void ) {
-
-	if(en_next_app_state == APP_STATE_DETECTION)
-		return;
-
-	// Interrompe o contador de em uso e inicia o contador de tempo ocioso
-	fnTIMESTAMP_Start_Horimetro( EN_IDLE_TIME );
-	// Elimina o tempo de debounce do sensor
-	// TODO: verficar se é necessário ajustar o tempo de debounce para a unidade.
-	//       a expectativa é que a unidade seja sempre em segundos, mas a variável permite outras configurações.
-	fnTIMESTAMP_Update_Horimetro_Used_Counter(st_system_status.st_sigmais_detection_debounce.time_value);
-
-	st_system_status.u32_event_timestamp = fnTIMESTAMP_Get_Updated_Timestamp();
-
-	st_system_status.u32_timer_on = fnTIMESTAMP_Get_Horimetro( EN_USED_TIME );
-
-
-	fnDEBUG_Const_String("fnAPP_No_Detection\r\n");
-	//st_system_status.b_detection_status = fnSENSORS_Has_Detection();
-	//por interrupção
-	st_system_status.b_detection_status = un_system_flags.flag.lsm303agr_act;
-	if ( st_system_status.b_data_processed ){
-		// transmissao por eventos
-		if (first_package_of_day){
-			first_package_of_day = false;
-			fnCOMM_SIGMAIS_Send_Info_Frame_Horimetro();
-		}
-		else{
-			fnCOMM_SIF_Send_Horimetro_Pulsimetro();
-		}
-		u8_detection_transmit_counter = 1;
-
-		if ( st_timer_confirmation_frame.b_busy ){
-			fnTIMER_Stop( st_timer_confirmation_frame.u8_index );
-		}
-
-		// TODO: Bloquear as transmissões em menso de 6s, ou seja, o programa deverá garantir um gap de 6s entre transmissoes
-		//       sob pena de dar radio busy
-		/*
-      fnTIMER_Start( &st_timer_confirmation_frame,
-      MS_TO_TICKS(  fnTIMESTAMP_Covert_Time_Bitfield_Into_Secs(  (st_sigmais_time_byte_bitfield_t *) &st_system_status.st_sigmais_confirmation_time ) * 1000 ),
-      TIMER_TYPE_CONTINUOUS,
-      fnSTATE_MACHINE_Confirmation,
-      NULL );
-		 */
-		//SpiInit( &SX1276.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
-		//SX1276IoInit( );
-	}
-
-	// testes de reconfiguração de clock
-	// só assim retorna a níveis de baixo consumo
-
-	return;
-}
-
-
 void fnAPP_STATE_EXIT_Configuration ( void ) {
-	return;
-}
-
-void fnAPP_STATE_EXIT_Confirming_Detection ( void ) {
-
-	//st_system_status.b_detection_status = fnSENSORS_Has_Detection();
-	st_system_status.b_detection_status = un_system_flags.flag.lsm303agr_act;
 	return;
 }
 
@@ -777,16 +491,6 @@ void fnAPP_STATE_System_Reconfiguration ( en_sigmais_downlink_frame_type_t en_si
 		st_sigfox_events.flag.b_config_frame_received = true;
 	} else if( en_sigmais_downlink_frame_type == EN_SIGMAIS_DOWNLINK_CONFIG_PARK_PARAMETERS ) {
 		st_sigfox_events.flag.b_config_frame_received = true;
-	}
-
-	return;
-}
-
-void fnAPP_STATE_Detection_Confirmed ( void * pv_null ) {
-
-	//modo por interrupção
-	if (un_system_flags.flag.lsm303agr_act == 1){
-		st_sigfox_events.flag.b_detection_confirmed = true;
 	}
 
 	return;
@@ -840,9 +544,10 @@ en_app_state_t fnAPP_STATE_Check_Day_Event ( en_app_state_t en_app_state ) {
 
 		b_check_allowed = false;
 
-		if( st_timer_confirm_detection.b_busy ){
-			fnTIMER_Stop( st_timer_confirm_detection.u8_index );
-		}
+		// todo: verificar
+//		if( st_timer_confirm_detection.b_busy ){
+//			fnTIMER_Stop( st_timer_confirm_detection.u8_index );
+//		}
 
 		en_next_app_state = en_app_state;
 		return APP_STATE_CHECK_CONFIG;
@@ -862,9 +567,10 @@ en_app_state_t fnAPP_STATE_Check_Config_Report_Event ( en_app_state_t en_app_sta
 	if (u16_config_report_timer_table[st_system_status.u8_config_report_timer_periodico] != 0 ){
 		if(b_hour_changed && ( (u32_actual_hour % u16_config_report_timer_table[st_system_status.u8_config_report_timer_periodico]) == 0 ) ) {
 
-			if( st_timer_confirm_detection.b_busy ){
-				fnTIMER_Stop( st_timer_confirm_detection.u8_index );
-			}
+			// todo: verificar
+//			if( st_timer_confirm_detection.b_busy ){
+//				fnTIMER_Stop( st_timer_confirm_detection.u8_index );
+//			}
 
 			en_next_app_state = en_app_state;
 			return APP_STATE_CHECK_CONFIG;
@@ -895,7 +601,7 @@ void fnSTATE_MACHINE_On_State_Changed( st_state_machine_desc_t * pst_desc ) {
 
       if( st_timer_keep_alive.b_busy ) {
          fnTIMER_Stop( st_timer_keep_alive.u8_index );
-      }   
+      }
 
       fnTIMER_Start( &st_timer_keep_alive,
       MS_TO_TICKS( fnTIMESTAMP_Covert_Time_Bitfield_Into_Secs(  (st_sigmais_time_byte_bitfield_t *) &st_system_status.st_sigmais_keep_alive_time ) * 1000 ),
@@ -903,7 +609,7 @@ void fnSTATE_MACHINE_On_State_Changed( st_state_machine_desc_t * pst_desc ) {
       fnSTATE_MACHINE_Keep_Alive,
       NULL );
 
-   }   
+   }
 	 */
 	return;
 }
@@ -938,13 +644,14 @@ void fnSTATE_MACHINE_Periodic_Transmission( st_state_machine_desc_t * pst_desc )
 
 	if (st_system_status.b_downlink_config_frame_received){
 		st_system_status.b_downlink_config_frame_received = false;
+
 		if (st_timer_periodic_transmission.b_busy){
 			fnTIMER_Stop( st_timer_periodic_transmission.u8_index );
 		}
 	}
 
 	if (!st_system_status.b_data_processed ){
-		if( (pst_desc->current_state == APP_STATE_RUN ) || (pst_desc->current_state == APP_STATE_CONFIRMING_DETECTION) || (pst_desc->current_state == APP_STATE_DETECTION) || (pst_desc->current_state == APP_STATE_CONFIGURATION) ){
+		if( (pst_desc->current_state == APP_STATE_RUN ) || (pst_desc->current_state == APP_STATE_CONFIGURATION) ){
 
 			if( !st_timer_periodic_transmission.b_busy ) {
 				//    fnTIMER_Stop( st_timer_periodic_transmission.u8_index );
