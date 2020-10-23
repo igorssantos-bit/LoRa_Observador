@@ -125,7 +125,7 @@ bool fnLsm303_Init(lsm303agr_ctx_t dev_ctx_xl, lsm303agr_ctx_t dev_ctx_mg){
 	/*
 	 * Set Output Data Rate
 	 */
-	lsm303agr_xl_data_rate_set(&dev_ctx_xl, LSM303AGR_XL_ODR_25Hz);
+	lsm303agr_xl_data_rate_set(&dev_ctx_xl, LSM303AGR_XL_POWER_DOWN);
 	lsm303agr_mag_data_rate_set(&dev_ctx_mg, LSM303AGR_MG_ODR_10Hz);
 
 	/*
@@ -146,7 +146,7 @@ bool fnLsm303_Init(lsm303agr_ctx_t dev_ctx_xl, lsm303agr_ctx_t dev_ctx_mg){
 	/*
 	 * Enable temperature sensor
 	 */
-	lsm303agr_temperature_meas_set(&dev_ctx_xl, LSM303AGR_TEMP_ENABLE);
+	lsm303agr_temperature_meas_set(&dev_ctx_xl, LSM303AGR_TEMP_DISABLE);
 
 	/*
 	 * Set device in continuos mode
@@ -157,7 +157,7 @@ bool fnLsm303_Init(lsm303agr_ctx_t dev_ctx_xl, lsm303agr_ctx_t dev_ctx_mg){
 	/*
 	 * Set magnetometer in continuos mode
 	 */
-	lsm303agr_mag_operating_mode_set(&dev_ctx_mg, LSM303AGR_CONTINUOUS_MODE);
+	lsm303agr_mag_operating_mode_set(&dev_ctx_mg, LSM303AGR_POWER_DOWN);
 
 	/*
 	 * Set magnetometer in low power mode:

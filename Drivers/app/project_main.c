@@ -242,48 +242,29 @@ int ProjectMain( void )
 	RtcDelayMs(3000);
 
 	GetDeviceSN();
-
 	LmHandlerInit( &LmHandlerCallbacks, &LmHandlerParams );
-
-	// The LoRa-Alliance Compliance protocol package should always be
-	// initialized and activated.
 	LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams );
-
 	LmHandlerJoin( );
 
 	fnAPP_Init();
 
 	IsMacProcessPending = 0;
 
-	flag_rejoin = 0;
 	while( 1 )
 	{
-
-		if (flag_rejoin){
-			flag_rejoin = 0;
-			ResetMacParameters();
-			LmHandlerInit( &LmHandlerCallbacks, &LmHandlerParams );
-			LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams );
-			LmHandlerJoin( );
-			//printf("rejoin\r\n");
-		}
 
 		LmHandlerProcess( );
 
 		fnAPP_Process_Events();
-		//GpioToggle(&Led1);
 
 		switch (IsMacProcessPending){
 
 		// Modo normal: pode dormir o processador
 		case LORA_IDLE:{
 			if (!LmHandlerIsBusy()){
-				//HAL_PWR_EnterSLEEPMode(PWR_LOWPOWERREGULATOR_ON,PWR_STOPENTRY_WFI);
-				//GpioWrite( &Led1, 1 );
 				if (st_system_status.u8_state_machine_state == APP_STATE_RUN){
 					LpmEnterStopMode();
 					LpmExitStopMode();
-
 				}
 			}
 		}
@@ -299,6 +280,7 @@ int ProjectMain( void )
 		case LORA_TIMEOUT:{
 			if (fnTIMESTAMP_Get_Timestamp_Counter_Seconds() - timeOutMacBusy > 6){
 				IsMacProcessPending = 0;
+
 				// Reconfigure clock to low power
 				HAL_RCC_DeInit();
 				for (uint16_t atraso= 0; atraso < 10000; atraso++){
@@ -306,18 +288,12 @@ int ProjectMain( void )
 				}
 
 				SystemClockConfig_MSI();
-				//fltTime = AJUSTE_TIMER_CLOCK_LENTO;
 				for (uint16_t atraso= 0; atraso < 10000; atraso++){
 					__ASM volatile ("nop");
 				}
-
-				//MX_USART1_UART_DeInit();
-				//MX_I2C1_DeInit();
 				BoardDeInitPeriph();
 				BoardInitPeriph();
 
-				//CRITICAL_SECTION_END( );
-				// xSemaphoreGive();
 			}
 		}
 		break;

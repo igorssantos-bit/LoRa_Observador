@@ -117,19 +117,10 @@ void fnAPP_Init ( void ) {
 
 	fnSENSORS_Init();
 
-	//fnRADIO_Init();
-	//fnINPUT_ANALOGIC_Init();
 	un_system_flags.flag.fxos_1_int_threshold = false;
 
-	if (DS18B20InitSequence(ONE_WIRE_PORT_PIN_1, ONE_WIRE_PIN_1)){
-		st_system_status.b_probe1_enabled = true;
-	}
-	else  st_system_status.b_probe1_enabled = false;
-
-	if (DS18B20InitSequence(ONE_WIRE_PORT_PIN_2, ONE_WIRE_PIN_2)){
-		st_system_status.b_probe2_enabled = true;
-	}
-	else  st_system_status.b_probe2_enabled = false;
+	st_system_status.b_probe1_enabled = false;
+	st_system_status.b_probe2_enabled = false;
 
 	fnAPP_STATE_MACHINE_Init( );
 	fnAPP_STATE_Machine( EVENT_SYSTEM_INIT );
@@ -143,69 +134,13 @@ void fnAPP_Init ( void ) {
 
 // TODO: esta funcao
 void fnAPP_Process_Events ( void ) {
-	uint32_t currentTimeElapsed = 0;
-
-	currentTimeElapsed = RtcGetTimerElapsedTime();
-	if ( un_system_flags.flag.pulse1_flag == true ) {
-		un_system_flags.flag.pulse1_flag = false;
-		if ((currentTimeElapsed - st_system_status.u32_last_timer_pulsos_1) >= DEBOUNCE_TIME){
-			st_system_status.u32_last_timer_pulsos_1 = currentTimeElapsed;
-			st_system_status.u32_number_of_pulsos_1++;
-			//printf("numero_pulsos %u",st_system_status.u32_number_of_pulsos_1 );
-			fnDEBUG_32bit_Hex("numero_pulsos1 ", st_system_status.u32_number_of_pulsos_1, "\r\n");
-		}
-		//else{
-		//   printf("\r\n DEBOUNCE NO PULSO \r\n");
-		//}
-	}
-	if ( un_system_flags.flag.pulse2_flag == true ) {
-		un_system_flags.flag.pulse2_flag = false;
-		if ((currentTimeElapsed - st_system_status.u32_last_timer_pulsos_2) >= DEBOUNCE_TIME){
-			st_system_status.u32_last_timer_pulsos_2 = currentTimeElapsed;
-			st_system_status.u32_number_of_pulsos_2++;
-			//printf("numero_pulsos %u",st_system_status.u32_number_of_pulsos_2 );
-			fnDEBUG_32bit_Hex("numero_pulsos2 ", st_system_status.u32_number_of_pulsos_2, "\r\n");
-		}
-		//else{
-		//   printf("\r\n DEBOUNCE NO PULSO \r\n");
-		//}
-	}
 
 	// Processa RTC e eventos de Mag
 	current_seconds = RtcGetCalendarTime(&miliseconds);
 	if (current_seconds != previous_seconds){
 		previous_seconds = current_seconds;
 		fnAPP_Process_Event_RTC();
-		//printf("mag_counter: %lu\t", mag_counter);
-		printf("used_timer: %lu\t", fnTIMESTAMP_Get_Horimetro_Seconds(EN_USED_TIME));
-		printf("idle_timer: %lu\r\n", fnTIMESTAMP_Get_Horimetro_Seconds(EN_IDLE_TIME));
-
-		if( (mag_state == 0) && (st_system_status.u8_state_machine_state == APP_STATE_RUN) ){
-			turnon_Mag(dev_ctx_mg);
-			RtcDelayMs(25);
-			printf("\r\n######## mag_on ########\r\n\r\n");
-			mag_state = 1;
-			mag_counter = 0;
-		}
-		if( mag_counter == 120 ){
-			turnoff_Mag(dev_ctx_mg);
-			RtcDelayMs(25);
-			printf("\r\n######## mag_off ########\r\n\r\n");
-		}
-		if( (mag_counter > 120) && (un_system_flags.flag.system_active == 1) ){
-			un_system_flags.flag.system_active = 0;
-			mag_state = 0;
-		}
-		mag_counter++;
-
-		fnAPP_STATE_Machine( EVENT_MAG_DATA_READY );
-		if ( un_system_flags.flag.fxos_1_int_threshold == true ) {
-			un_system_flags.flag.fxos_1_int_threshold = false;
-			fnAPP_Process_Event_Mag_Threshold();
-		}
 	}
-
-	//GpioWrite( &Led1, 0 );
 	return;
 
 }

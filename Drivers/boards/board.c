@@ -134,20 +134,16 @@ void BoardInitPeriph( void )
 	MX_I2C1_Init( );
 	MX_USART1_UART_Init( );
 	MX_ADC_Init();
-	OneWireOutputSetup(ONE_WIRE_PORT_PIN_1, ONE_WIRE_PIN_1);
-	OneWireOutputSetup(ONE_WIRE_PORT_PIN_2, ONE_WIRE_PIN_2);
 
-	// Hardware relacionado ao radio
 	SX1276IoDbgInit( );
 	SX1276IoTcxoInit( );
 	SpiInit( &SX1276.Spi, SPI_1, RADIO_MOSI, RADIO_MISO, RADIO_SCLK, NC );
 	SX1276IoInit( );
 
 	if( McuInitialized == false ){
-		// Accelerometer and magnetometer init
+		// LSM303 inicialização desligado
 		fnLsm303_Init(dev_ctx_xl, dev_ctx_mg);
 		turnoff_Mag(dev_ctx_mg);
-		fnLSM303_Accel_LPMode(dev_ctx_xl);
 
 		// Temperature and Humidity sensor Init
 		si7021_set_config(&hi2c1, SI7021_HEATER_OFF, SI7021_RESOLUTION_RH8_TEMP12);
@@ -180,20 +176,11 @@ void BoardDeInitPeriph( void )
 void BoardInitMcu( void )
 {
 	if(McuInitialized == false){
-		//STM32 HAL library initialization
 		HAL_Init( );
 	}
 
-	// Configure the system clock
 	SystemClockConfig_MSI();
-	//SystemClockConfig_HighSpeed();
-
-	// Disbale Stand-by mode
 	LpmSetOffMode( LPM_APPLI_ID, LPM_DISABLE );
-
-	// Initialize unused pins.
-	// See pinout at Readme.md
-	//Debug_Init();
 	BoardEnableDBG();
 
 	// Configure the hardware
@@ -651,15 +638,8 @@ void MX_GPIO_Init(void)
 	HAL_GPIO_Init(PA1_ANT_SW_RX_Port, &GPIO_InitStruct);
 
 	/* Configuração dos pinos não utilizados (NC) e pinos Analogicos */
-	GPIO_InitStruct.Pin =  EXTI0_XL_Pin | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_8 | GPIO_PIN_9| GPIO_PIN_10| GPIO_PIN_11;
+	GPIO_InitStruct.Pin =  EXTI0_XL_Pin | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_8 | GPIO_PIN_9| GPIO_PIN_10| GPIO_PIN_11;
 	GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-
-	/* Configuração do Pino A3 (Accel-INT2) */
-	GPIO_InitStruct.Pin = GPIO_PIN_3;
-	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
@@ -685,26 +665,9 @@ void MX_GPIO_Init(void)
 	 *
 	 */
 
-	/* Configuração do LED */
-	HAL_GPIO_WritePin(PB5_LED1_Port, PB5_LED1_Pin, GPIO_PIN_RESET);
-	GpioInit( &Led1, LED, PIN_OUTPUT, PIN_PUSH_PULL, PIN_NO_PULL, 0 );
-
-	/* Configuração da Interrupção do Magnetometro */
-	// TODO: verificar pq está sendo gerado uma interrupção de magnetômetro ao pedir check_config
-	GPIO_InitStruct.Pin = EXTI2_MAGNET_Pin;
-	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-	/* Configuração da Interrupção do Pulso2 */
-	GPIO_InitStruct.Pin = GPIO_PIN_15 | GPIO_PIN_14 ;
-	GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-	GPIO_InitStruct.Pull = GPIO_PULLUP; //GPIO_NOPULL;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
 	/* Configuração dos pinos não utilizados (NC) */
 	GPIO_InitStruct.Pin = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12
-			| GPIO_PIN_13;
+			| GPIO_PIN_13 | GPIO_PIN_15 | GPIO_PIN_14 | EXTI2_MAGNET_Pin | GPIO_PIN_5;
 	GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);

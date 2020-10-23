@@ -72,7 +72,9 @@
 /*************************************************************************************************/
 /*    PRIVATE PROTOTYPES                                                                         */
 /*************************************************************************************************/
+// IGOR
 
+// OLD
 uint8_t fnAPP_STATE_Init ( uint8_t event );
 uint8_t fnAPP_STATE_Check_Config ( uint8_t event );
 uint8_t fnAPP_STATE_Run ( uint8_t event );
@@ -468,14 +470,6 @@ uint8_t fnAPP_STATE_Run ( uint8_t event ) {
 	}
 
 	bool b_is_working_hour = fnAPP_STATE_Is_At_Working_Hour( u8_actual_hour );
-
-	//if( b_is_working_hour && fnSENSORS_Has_Detection() ) {
-	//      return APP_STATE_CONFIRMING_DETECTION;
-	//}
-
-	// modo por interrupção do acelerometro.
-	//b_is_working_hour = true;  //teste
-	//printf("ligado = %d\r\n", un_system_flags.flag.lsm303agr_act);
 	if( b_is_working_hour && (un_system_flags.flag.lsm303agr_act == 1) ) {
 		return APP_STATE_CONFIRMING_DETECTION;; //return APP_STATE_DETECTION --> eliminar o debounce?;
 	}
@@ -562,21 +556,6 @@ uint8_t fnAPP_STATE_Configuration ( uint8_t event ) {
 	if (counterState > 50){
 		return APP_STATE_RUN;
 	}
-
-	/*
-   if( st_sigfox_events.flag.b_daily_update_received ) {
-
-      st_sigfox_events.flag.b_daily_update_received = false;
-
-      if( u8_configuration_transmition_counter <= 1 ) {
-         fnCOMM_SIGMAIS_Request_Downlink_Frame ( );
-         u8_configuration_transmition_counter++;
-      } else {
-         fnCOMM_SIGMAIS_Send_Error_Frame ( EN_SIGMAIS_ERROR_RECEIVE, EN_SIGMAIS_WRONG_FRAME );
-         b_next_state = true; 
-      }
-   }
-	 */
 
 	if( st_sigfox_events.flag.b_downlink_frame_received ) {
 		fnDEBUG_Const_String("donwlink frame recebido\r\n");
