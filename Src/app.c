@@ -77,15 +77,6 @@
 // Process events
 void fnAPP_Process_Event_RTC ( void );
 void fnAPP_Process_Event_System_Tick ( void );
-
-void fnAPP_Process_Event_Mag_Data_Ready ( st_accmag_raw_data_t * pst_mag_data );
-//void fnAPP_Process_Event_Accel_Mag_Data_Ready ( st_fxos8700cq_raw_data_t * pst_accel_data, st_fxos8700cq_raw_data_t * pst_mag_data );
-void fnAPP_Process_Event_Accel_Ready ( st_accmag_raw_data_t * pst_accel_data);
-void fnAPP_Process_Event_Mag_Threshold ( void );
-
-// APP Timer - Heartbeat
-// void fnAPP_TIMER_Heartbeat ( void );
-
 void fnAPP_Init_Standard_Values ( void );
 static void restoreData(void);
 static void restoreDataFactorytIf(void);
@@ -152,12 +143,6 @@ void fnAPP_Check_Events ( void ) {
 
 }
 
-//TODO: ajustar os modos de LOW Power
-void fnAPP_Enter_Low_Power ( void ) {
-	return;
-}
-
-
 /*************************************************************************************************/
 /*    SYSTEM EVENT                                                                               */
 /*************************************************************************************************/
@@ -172,86 +157,6 @@ void fnAPP_Process_Event_RTC ( void ) {
 	return;
 
 }
-
-
-void fnAPP_Process_Event_Mag_Data_Ready ( st_accmag_raw_data_t * pst_mag_data ) {
-
-	//fnSENSORS_Mag_Data_Ready ( pst_mag_data );
-
-	fnAPP_STATE_Machine( EVENT_MAG_DATA_READY );
-
-	return;
-
-}
-
-
-void fnAPP_Process_Event_Accel_Ready ( st_accmag_raw_data_t * pst_accel_data) {
-
-	fnSENSORS_Accel_Data_Ready ( pst_accel_data );
-
-	return;
-
-}
-
-/*
-void fnAPP_Process_Event_Accel_Mag_Data_Ready ( st_fxos8700cq_raw_data_t * pst_accel_data, st_fxos8700cq_raw_data_t * pst_mag_data ) {
-
-   fnSENSORS_Accel_Mag_Data_Ready ( pst_accel_data, pst_mag_data );
-
-   return;
-
-}
- */
-
-void fnAPP_Process_Event_Mag_Threshold ( void ) {
-
-	//fnSENSORS_Check_Magnetometer_Valid_Threshold( );
-	if (is_Mag_Threshold_Event (dev_ctx_mg) ){
-		fnDEBUG_Const_String("############### IMA EVENT  ###############\r\n");
-		fnAPP_STATE_Machine( EVENT_MAG_THRESHOLD );
-	}
-	return;
-
-}
-
-
-/*************************************************************************************************/
-/*    TIMER                                                                                      */
-/*************************************************************************************************/
-
-#if 0
-void fnAPP_TIMER_Heartbeat ( void ) {
-	//TODO: esta função
-	/*
-   if (Get_Uart_Stop_State() == false){
-
-     if ( fnSENSORS_Is_Mag_Calibrating() ) {
-
-        LED_ON;
-        fnDELAY_LOOP_ms(10);
-        LED_OFF;
-        fnDELAY_LOOP_ms(80);
-        LED_ON;
-        fnDELAY_LOOP_ms(10);
-        LED_OFF;
-
-     } else if ( fnSENSORS_Has_Detection() ) {      
-
-        LED_ON;
-
-      } else {
-
-        LED_OFF;
-
-      }
-
-   }
-	 */
-	return;
-
-}
-#endif
-
 /*************************************************************************************************/
 /*    INTERNAL FUNCTIONS                                                                         */
 /*************************************************************************************************/
@@ -302,8 +207,8 @@ void fnAPP_Init_Standard_Values ( void ) {
 	st_system_status.st_sigmais_transmission_timer.time_unity = EN_SIGMAIS_TIME_MINUTES;
 	st_system_status.st_sigmais_transmission_timer.time_value = 5;
 
-	st_system_status.b_data_processed = false;    // park = raw data e sense = transmissao periodica
-	//st_system_status.b_data_processed = true;       // sense = transmissao por eventos
+	//st_system_status.b_data_processed = false;    // park = raw data e sense = transmissao periodica
+	st_system_status.b_data_processed = true;       // sense = transmissao por eventos
 	st_system_status.b_configuration_pending = false;
 	st_system_status.u8_state_machine_state = 0;       //state_init
 
@@ -343,13 +248,13 @@ void fnAPP_Init_Standard_Values ( void ) {
 	st_system_status.b_calibration_authorized = true;
 	st_system_status.b_downlink_config_frame_received = false;
 
-	st_system_status.u32_number_of_pulsos_1 = 0;
-	st_system_status.u32_last_timer_pulsos_1 = 0;
-	st_system_status.u32_number_of_pulsos_2 = 0;
-	st_system_status.u32_last_timer_pulsos_2 = 0;
-	st_system_status.b_probe1_enabled = false;
-	st_system_status.b_probe2_enabled = false;
 	st_system_status.u32_machine_on = 0;
+
+	st_system_status.u8_op_code = 7;
+	st_system_status.u8_janela_BLE = 5;
+	st_system_status.u16_timeOut_BLE = 60;
+	st_system_status.u16_timer_Uplink = 60;
+
 	return;
 
 }
@@ -407,7 +312,7 @@ static void restoreData(void){
 
 
 		printf("\r\n*************************************************************\r\n");
-		printf("counter %x, time on %x  time off %x\r\n", st_system_status.u32_machine_on, st_system_status.u32_timer_on, st_system_status.u32_timer_off );
+		printf("counter %lu, time on %lu  time off %lu\r\n", st_system_status.u32_machine_on, st_system_status.u32_timer_on, st_system_status.u32_timer_off );
 		printf("*************************************************************\r\n");
 	}
 

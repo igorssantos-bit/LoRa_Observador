@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 
 /* Includes ------------------------------------------------------------------*/
+#include <stdio.h>
 #include "main.h"
 #include "stm32l0xx_it.h"
 /* Private includes ----------------------------------------------------------*/
@@ -56,6 +57,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern UART_HandleTypeDef huart1;
 //extern RTC_HandleTypeDef hrtc;
 //extern UART_HandleTypeDef huart2;
 /* USER CODE BEGIN EV */
@@ -204,16 +206,22 @@ void PendSV_Handler(void)
 /**
   * @brief This function handles USART2 global interrupt / USART2 wake-up interrupt through EXTI line 26.
   */
-//void USART2_IRQHandler(void)
-//{
+void USART1_IRQHandler(void){
+
   /* USER CODE BEGIN USART2_IRQn 0 */
+	if(__HAL_UART_GET_IT_SOURCE(&huart1, UART_IT_RXNE) != RESET)
+	 {
+		  printf("teste\r\n");
+	 }
+	 HAL_NVIC_ClearPendingIRQ(USART1_IRQn);
+//	return;
 
   /* USER CODE END USART2_IRQn 0 */
-//  HAL_UART_IRQHandler(&huart2);
+	HAL_UART_IRQHandler(&huart1);
   /* USER CODE BEGIN USART2_IRQn 1 */
 
   /* USER CODE END USART2_IRQn 1 */
-//}
+}
 
 /* USER CODE BEGIN 1 */
 

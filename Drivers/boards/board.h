@@ -207,6 +207,10 @@ void LpmExitStopMode( void );
 #define PB5_LED1_Pin 				GPIO_PIN_5
 #define PB5_LED1_Port 				GPIOB
 
+// BLE
+#define WKUP_BLE 						GPIO_PIN_8
+#define WKUP_BLE_GPIO_Port 		GPIOA
+
 // SX1276
 #define PA1_ANT_SW_RX_Pin			GPIO_PIN_1
 #define PA1_ANT_SW_RX_Port 			GPIOA

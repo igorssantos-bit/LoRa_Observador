@@ -32,6 +32,7 @@
 
 /* TODO: ajustar este arquivo */
 #include <stdint.h>
+#include <stdio.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <string.h>
@@ -55,6 +56,7 @@
 #include "board-config.h"
 #include "main.h"
 #include "rtc-board.h"
+#include "uart-board.h"
 
 
 
@@ -64,6 +66,8 @@
 
 #define OUT_OF_DAYTIME  0xFF
 #define TIME_TO_WAIT_NEW_TRANSMISSION 15
+#define MAX_GROUPS 64
+
 /*************************************************************************************************/
 /*    TYPEDEFS                                                                                   */
 /*************************************************************************************************/
@@ -109,6 +113,10 @@ en_app_state_t fnAPP_STATE_Check_Config_Report_Event ( en_app_state_t en_app_sta
 void fnAPP_STATE_State_Timeout ( void * pv_null );
 void fnSTATE_MACHINE_Keep_Alive( void * pv_null );
 void fnSTATE_MACHINE_Info_Frame_Horimetro( void * pv_null );
+
+uint8_t bufferSize( uint8_t *pbuffer );
+void clearBuffer(uint8_t *pbuffer,  uint8_t bufferSize);
+
 void print_device_data(void);
 void printDevEUI(void);
 void printDevAddr(void);
@@ -142,11 +150,10 @@ st_timer_index_t st_timer_confirm_detection;
 st_timer_index_t st_timer_periodic_transmission;
 uint8_t u8_detection_transmit_counter;
 
-//
-//
-//
-////en_module_type_t en_actual_module_type;
-//uint8_t u8_actual_strong_max_sensivity = 9;
+uint8_t f_config = 1;
+uint8_t num_Groups;
+uint8_t buffer_rx[MAX_GROUPS*8+5];
+uint16_t size_buffer;
 
 en_app_state_t en_next_app_state;
 
@@ -201,7 +208,7 @@ void fnAPP_STATE_ENTER_Init ( void ) {
 
 void fnAPP_STATE_ENTER_Check_Config ( void ) {
 
-	fnDEBUG_Const_String("fnAPP_Check_Config\r\n");
+	printf("fnAPP_Check_Config\r\n");
 	st_system_status.u8_state_machine_state = APP_STATE_CHECK_CONFIG;
 	HAL_Init( );
 	HAL_RCC_DeInit();
@@ -217,7 +224,6 @@ void fnAPP_STATE_ENTER_Check_Config ( void ) {
 	timerTxSeconds = fnTIMESTAMP_Get_Timestamp_Counter_Seconds();
 	fnCOMM_SIGMAIS_Send_Config_Report_Frame ( );
 
-
 	fnTIMER_Start( &st_timer_check_config_timeout,
 			MS_TO_TICKS( 120000 ),
 			TIMER_TYPE_CONTINUOUS,
@@ -232,7 +238,7 @@ void fnAPP_STATE_ENTER_Check_Config ( void ) {
 void fnAPP_STATE_ENTER_Configuration ( void ) {
 
 	st_system_status.u8_state_machine_state = APP_STATE_CONFIGURATION;
-	fnDEBUG_Const_String("fnAPP_Configuration\r\n");
+	printf("fnAPP_Configuration\r\n");
 
 	HAL_RCC_DeInit();
 	SystemClockConfig_HighSpeed();
@@ -254,7 +260,7 @@ void fnAPP_STATE_ENTER_Configuration ( void ) {
 
 
 void fnAPP_STATE_ENTER_Run ( void ) {
-	fnDEBUG_Const_String("fnAPP_Run\r\n");
+	printf("fnAPP_Run\r\n");
 	st_system_status.u8_state_machine_state = APP_STATE_RUN;
 
 	fnTIMESTAMP_Start_Horimetro( EN_IDLE_TIME );
@@ -263,21 +269,31 @@ void fnAPP_STATE_ENTER_Run ( void ) {
 }
 
 void fnAPP_STATE_ENTER_BLE_TX ( void ) {
+	printf("fnAPP_BLE_TX\r\n");
 	st_system_status.u8_state_machine_state = APP_STATE_BLE_TX;
+
+	// Limpa o buffer uart_rx
+	uint8_t * prt = &buffer_rx[0];
+	clearBuffer( prt, bufferSize( prt ));
+	huart1.pRxBuffPtr = &buffer_rx[0];
+
 	return;
 }
 
 void fnAPP_STATE_ENTER_BLE_RX ( void ) {
+	printf("fnAPP_BLE_RX\r\n");
 	st_system_status.u8_state_machine_state = APP_STATE_BLE_RX;
 	return;
 }
 
 void fnAPP_STATE_ENTER_Send_BLE_Data ( void ) {
+	printf("fnAPP_BLE_Send_Data\r\n");
 	st_system_status.u8_state_machine_state = APP_STATE_SEND_BLE_DATA;
 	return;
 }
 
 void fnAPP_STATE_ENTER_Wait_Transmission ( void ){
+	printf("fnAPP_Wait_Transmission\r\n");
 	st_system_status.u8_state_machine_state = APP_STATE_WAIT_TRANSMISSION;
 	counterState = 0;
 }
@@ -290,8 +306,8 @@ void fnAPP_STATE_ENTER_Wait_Transmission ( void ){
 uint8_t fnAPP_STATE_Init ( uint8_t event ) {
 	en_next_app_state = APP_STATE_RUN;
 
-	return APP_STATE_CHECK_CONFIG;
-	//return APP_STATE_RUN;
+	//return APP_STATE_CHECK_CONFIG;
+	return APP_STATE_RUN;
 }
 
 uint8_t fnAPP_STATE_Check_Config ( uint8_t event ) {
@@ -377,8 +393,8 @@ uint8_t fnAPP_STATE_Configuration ( uint8_t event ) {
 		st_sigfox_events.flag.b_config_frame_received = false;
 		fnSENSORS_Config ( );
 
-		// todo: arrumar para configurar o LoRa
-		//u8_actual_strong_max_sensivity = st_system_status.u8_strong_mag_sensivity;
+		// configurar o lora aqui
+		f_config =1;
 
 		b_next_state = true;
 	}
@@ -394,26 +410,74 @@ uint8_t fnAPP_STATE_Configuration ( uint8_t event ) {
 
 uint8_t fnAPP_STATE_Run ( uint8_t event ) {
 	en_app_state_t  check_day_event_return;
-	uint8_t u8_actual_hour = fnTIMESTAMP_Get_Day_Hour();
 
-	check_day_event_return = fnAPP_STATE_Check_Day_Event ( APP_STATE_RUN );
-	if (check_day_event_return == APP_STATE_RUN){
-		return fnAPP_STATE_Check_Config_Report_Event ( APP_STATE_RUN);
+	check_day_event_return = fnAPP_STATE_Check_Day_Event ( APP_STATE_BLE_TX );
+
+	// todo: verificar necessidade
+	if (check_day_event_return == APP_STATE_BLE_TX){
+		return fnAPP_STATE_Check_Config_Report_Event ( APP_STATE_BLE_TX);
 	}
 
 	return check_day_event_return;
 }
 
-uint8_t fnAPP_STATE_Wait_Transmission ( uint8_t event ) {
+uint8_t fnAPP_STATE_BLE_TX ( uint8_t event ){
+	// Acorda o BLE pelo Pino PA8
+	HAL_GPIO_WritePin(WKUP_BLE_GPIO_Port, WKUP_BLE, GPIO_PIN_RESET);
 
-//	// transmissao por eventos
-//			if (first_package_of_day){
-//				first_package_of_day = false;
-//				fnCOMM_SIGMAIS_Send_Info_Frame_Horimetro();
-//			}
-//			else{
-//				fnCOMM_SIF_Send_Horimetro_Pulsimetro();
-//			}
+	if(f_config == 1){
+		printf("[H:2,%02X,%02X,%04X]\r\n", st_system_status.u8_op_code,
+				st_system_status.u8_janela_BLE, st_system_status.u16_timeOut_BLE);
+//		fnDEBUG_8bit_Hex(",", st_system_status.u8_op_code, "");
+//		fnDEBUG_8bit_Hex(",", st_system_status.u8_janela_BLE, "");
+//		fnDEBUG_16bit_Hex(",", st_system_status.u16_timeOut_BLE, "]\r\n");
+		f_config = 0;
+	}
+
+	return APP_STATE_BLE_RX;
+}
+
+uint8_t fnAPP_STATE_BLE_RX ( uint8_t event ){
+
+	size_buffer = 5+num_Groups*8;
+	// [H:1,1F:0001,20:0001,21:0001]
+	// 5B 48 3A 31 2C 31 46 3A 30 30 30 31 2C 32 30 3A 30 30 30 31 2C 32 31 3A 30 30 30 31 5D
+	// [  H	 :  1  ,  1  F  :  0  0  0  1  ,  2  0  :  0  0  0  1  ,  2  0  :  0  0  0  1  ]
+
+	HAL_UART_Receive(&huart1, &buffer_rx[0], size_buffer, 5);
+
+	char header1[] = "[H:1";
+	if ( memcmp(&buffer_rx[0], header1, 4) != 0 ){
+		uint8_t * prt = &buffer_rx[0];
+		clearBuffer( prt, bufferSize( prt ));
+		huart1.pRxBuffPtr = &buffer_rx[0];
+		HAL_Delay(30);
+		return APP_STATE_BLE_RX;
+	}
+
+	return APP_STATE_SEND_BLE_DATA;
+//
+//	uint8_t * prt = &buffer_rx[0];
+//	num_Groups = ( bufferSize( prt ) - 5)/8 ;
+//
+//	// Acorda o BLE pelo Pino PA8
+//	HAL_GPIO_WritePin(WKUP_BLE_GPIO_Port, WKUP_BLE, GPIO_PIN_RESET);
+//
+//	return APP_STATE_SEND_BLE_DATA;
+}
+
+uint8_t fnAPP_STATE_Send_BLE_Data ( uint8_t event ){
+
+	st_system_status.data_prt = &buffer_rx[0];
+	st_system_status.data_size = num_Groups*6+1; // num de bytes a serem enviados
+
+	// estruturar esse frame
+	//fnCOMM_SIGMAIS_Send_Frame_Tabela();
+
+	return APP_STATE_WAIT_TRANSMISSION;
+}
+
+uint8_t fnAPP_STATE_Wait_Transmission ( uint8_t event ) {
 
 	counterState++;
 	if (counterState > 15)
@@ -427,7 +491,6 @@ uint8_t fnAPP_STATE_Wait_Transmission ( uint8_t event ) {
 /*************************************************************************************************/
 
 void fnAPP_STATE_EXIT_Init ( void ) {
-
 	return;
 }
 
@@ -446,12 +509,23 @@ void fnAPP_STATE_EXIT_Check_Config ( void ) {
 	return;
 }
 
-void fnAPP_STATE_EXIT_Run ( void ) {
-
+void fnAPP_STATE_EXIT_Configuration ( void ) {
 	return;
 }
 
-void fnAPP_STATE_EXIT_Configuration ( void ) {
+void fnAPP_STATE_EXIT_Run ( void ) {
+	return;
+}
+
+void fnAPP_STATE_EXIT_BLE_TX ( void ) {
+	return;
+}
+
+void fnAPP_STATE_EXIT_BLE_RX ( void ) {
+	return;
+}
+
+void fnAPP_STATE_EXIT_Send_BLE_Data ( void ) {
 	return;
 }
 
@@ -544,11 +618,6 @@ en_app_state_t fnAPP_STATE_Check_Day_Event ( en_app_state_t en_app_state ) {
 
 		b_check_allowed = false;
 
-		// todo: verificar
-//		if( st_timer_confirm_detection.b_busy ){
-//			fnTIMER_Stop( st_timer_confirm_detection.u8_index );
-//		}
-
 		en_next_app_state = en_app_state;
 		return APP_STATE_CHECK_CONFIG;
 	}
@@ -567,18 +636,12 @@ en_app_state_t fnAPP_STATE_Check_Config_Report_Event ( en_app_state_t en_app_sta
 	if (u16_config_report_timer_table[st_system_status.u8_config_report_timer_periodico] != 0 ){
 		if(b_hour_changed && ( (u32_actual_hour % u16_config_report_timer_table[st_system_status.u8_config_report_timer_periodico]) == 0 ) ) {
 
-			// todo: verificar
-//			if( st_timer_confirm_detection.b_busy ){
-//				fnTIMER_Stop( st_timer_confirm_detection.u8_index );
-//			}
-
 			en_next_app_state = en_app_state;
 			return APP_STATE_CHECK_CONFIG;
 		}
 	}
 
 	return en_app_state;
-
 
 }
 
@@ -613,32 +676,6 @@ void fnSTATE_MACHINE_On_State_Changed( st_state_machine_desc_t * pst_desc ) {
 	 */
 	return;
 }
-
-
-void fnSTATE_MACHINE_Keep_Alive( void * pv_null ) {
-
-	// fnCOMM_SIGMAIS_Send_Info_Frame( );
-
-	return;
-}
-
-/*
-void fnSTATE_MACHINE_Confirmation( void * pv_null ) {
-  //TODO: voltar com os timers
-   if( u8_detection_transmit_counter < ( 1 + st_system_status.u8_n_retransmitions ) ) {
-
-      fnCOMM_SIGMAIS_Send_Info_Frame( );
-      u8_detection_transmit_counter++;
-
-   } else {
-      if( st_timer_confirmation_frame.b_busy ) {
-         fnTIMER_Stop( st_timer_confirmation_frame.u8_index );
-      }
-   }
-
-   return;
-}
- */
 
 void fnSTATE_MACHINE_Periodic_Transmission( st_state_machine_desc_t * pst_desc ) {
 
@@ -691,10 +728,29 @@ void fnSTATE_MACHINE_Info_Frame_Horimetro( void * pv_null ) {
 	return;
 }
 
+uint8_t bufferSize( uint8_t *pbuffer ){
+
+	uint8_t posFimString = 0;
+	for (uint8_t ii = 0; ii < MAX_GROUPS*8+5 ; ii++ ){
+		if (pbuffer[ii] == '\0')
+			break;
+		posFimString++;
+	}
+
+	return posFimString;
+}
+
+void clearBuffer(uint8_t *pbuffer,  uint8_t bufferSize){
+
+	for (uint8_t ii = 0; ii < bufferSize; ii++ ){
+		pbuffer[ii] = 0;
+	}
+}
+
 
 void print_device_data(void){
 
-	fnDEBUG_Const_String( "\r\n");
+	printf("\r\n");
 	fnDEBUG_8bit_Value("Versao: ", st_system_status.fwVersion.fwa,".");
 	fnDEBUG_8bit_Value("", st_system_status.fwVersion.fwb,".");
 	fnDEBUG_8bit_Value("", st_system_status.fwVersion.fwc,".");

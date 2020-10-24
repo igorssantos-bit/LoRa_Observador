@@ -101,8 +101,13 @@ typedef struct {
    uint8_t u8_state_machine_state;
    bool b_downlink_config_frame_received;
 
-
-
+   // BLE
+   uint8_t u8_op_code;
+   uint8_t u8_janela_BLE;
+   uint16_t u16_timeOut_BLE;
+   uint16_t u16_timer_Uplink;
+   uint8_t* data_prt;
+   uint16_t data_size;
 
 } st_system_status_t;
 

@@ -262,9 +262,10 @@ int ProjectMain( void )
 		// Modo normal: pode dormir o processador
 		case LORA_IDLE:{
 			if (!LmHandlerIsBusy()){
-				if (st_system_status.u8_state_machine_state == APP_STATE_RUN){
-					LpmEnterStopMode();
-					LpmExitStopMode();
+				if (st_system_status.u8_state_machine_state == APP_STATE_WAIT_TRANSMISSION){
+					printf("era pra dormir aqui \r\n");
+					//LpmEnterStopMode();
+					//LpmExitStopMode();
 				}
 			}
 		}

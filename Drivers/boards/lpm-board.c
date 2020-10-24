@@ -148,13 +148,13 @@ __weak void LpmExitSleepMode( void )
 {
 }
 
-__weak void LpmEnterStopMode( void )
-{
-}
-
-__weak void LpmExitStopMode( void )
-{
-}
+//__weak void LpmEnterStopMode( void )
+//{
+//}
+//
+//__weak void LpmExitStopMode( void )
+//{
+//}
 
 __weak void LpmEnterOffMode( void )
 {
