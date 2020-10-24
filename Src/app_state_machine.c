@@ -272,17 +272,18 @@ void fnAPP_STATE_ENTER_BLE_TX ( void ) {
 	printf("fnAPP_BLE_TX\r\n");
 	st_system_status.u8_state_machine_state = APP_STATE_BLE_TX;
 
-	// Limpa o buffer uart_rx
-	uint8_t * prt = &buffer_rx[0];
-	clearBuffer( prt, bufferSize( prt ));
-	huart1.pRxBuffPtr = &buffer_rx[0];
-
 	return;
 }
 
 void fnAPP_STATE_ENTER_BLE_RX ( void ) {
 	printf("fnAPP_BLE_RX\r\n");
 	st_system_status.u8_state_machine_state = APP_STATE_BLE_RX;
+
+	// limpa buffer
+	uint8_t * prt = &buffer_rx[0];
+	clearBuffer( prt, bufferSize( prt ));
+	huart1.pRxBuffPtr = &buffer_rx[0];
+
 	return;
 }
 
@@ -439,37 +440,42 @@ uint8_t fnAPP_STATE_BLE_TX ( uint8_t event ){
 
 uint8_t fnAPP_STATE_BLE_RX ( uint8_t event ){
 
-	size_buffer = 5+num_Groups*8;
 	// [H:1,1F:0001,20:0001,21:0001]
 	// 5B 48 3A 31 2C 31 46 3A 30 30 30 31 2C 32 30 3A 30 30 30 31 2C 32 31 3A 30 30 30 31 5D
 	// [  H	 :  1  ,  1  F  :  0  0  0  1  ,  2  0  :  0  0  0  1  ,  2  0  :  0  0  0  1  ]
 
-	HAL_UART_Receive(&huart1, &buffer_rx[0], size_buffer, 5);
+	uint8_t valid_flag = 0;
+	while(valid_flag == 0){
+		// habilita a interrupção de leitura
+		HAL_UART_Receive_IT(&huart1, buffer_rx, 50);
+		RtcDelayMs(1000);
 
-	char header1[] = "[H:1";
-	if ( memcmp(&buffer_rx[0], header1, 4) != 0 ){
-		uint8_t * prt = &buffer_rx[0];
-		clearBuffer( prt, bufferSize( prt ));
-		huart1.pRxBuffPtr = &buffer_rx[0];
-		HAL_Delay(30);
-		return APP_STATE_BLE_RX;
+		// caso não achar o cabeçalho desejado, reinicia
+		uint8_t header1[] = "[H:1";
+		if ( memcmp(&buffer_rx[0], &header1, 4) != 0 ){
+			uint8_t * prt = &buffer_rx[0];
+			clearBuffer( prt, bufferSize( prt ));
+			huart1.pRxBuffPtr = &buffer_rx[0];
+			HAL_Delay(30);
+		}else{
+			uint8_t * prt = &buffer_rx[0];
+			num_Groups = ( bufferSize( prt ) - 5)/8 ;
+			st_system_status.data_prt = &buffer_rx[0];
+			st_system_status.data_size = num_Groups*6+1; // num de bytes a serem enviados
+			valid_flag = 1;
+		}
+
 	}
 
+	// Dorme o BLE pelo Pino PA8
+	HAL_GPIO_WritePin(WKUP_BLE_GPIO_Port, WKUP_BLE, GPIO_PIN_RESET);
+
 	return APP_STATE_SEND_BLE_DATA;
-//
-//	uint8_t * prt = &buffer_rx[0];
-//	num_Groups = ( bufferSize( prt ) - 5)/8 ;
-//
-//	// Acorda o BLE pelo Pino PA8
-//	HAL_GPIO_WritePin(WKUP_BLE_GPIO_Port, WKUP_BLE, GPIO_PIN_RESET);
-//
-//	return APP_STATE_SEND_BLE_DATA;
 }
 
 uint8_t fnAPP_STATE_Send_BLE_Data ( uint8_t event ){
 
-	st_system_status.data_prt = &buffer_rx[0];
-	st_system_status.data_size = num_Groups*6+1; // num de bytes a serem enviados
+
 
 	// estruturar esse frame
 	//fnCOMM_SIGMAIS_Send_Frame_Tabela();

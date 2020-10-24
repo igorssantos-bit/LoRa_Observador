@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include "main.h"
 #include "stm32l0xx_it.h"
+#include "board.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -210,25 +211,10 @@ void PendSV_Handler(void)
  */
 void USART1_IRQHandler(void){
 
-#if 1
-	/* USER CODE BEGIN USART2_IRQn 0 */
-	if(__HAL_UART_GET_IT_SOURCE(&huart1, UART_IT_RXNE) != RESET){
-		printf("\r\ntesteu\r\n");
-
-		//		uint8_t byte;
-		//
-		//		HAL_UART_Receive_IT(&huart1, (uint8_t *) byte, 1);
-		//
-		//		printf("\r\n%u\r\n", byte);
-
-	}
-	HAL_NVIC_ClearPendingIRQ(USART1_IRQn);
-	//	return;
-
 	/* USER CODE END USART2_IRQn 0 */
 	HAL_UART_IRQHandler(&huart1);
 	/* USER CODE BEGIN USART2_IRQn 1 */
-#endif
+
 	/* USER CODE END USART2_IRQn 1 */
 
 }
