@@ -116,21 +116,22 @@ void fnAPP_Init ( void ) {
 	fnAPP_STATE_MACHINE_Init( );
 	fnAPP_STATE_Machine( EVENT_SYSTEM_INIT );
 
-	//TODO: acertar o timestamp_init()
-	//fnTIMESTAMP_Init();
-
 	return;
 
 }
 
-// TODO: esta funcao
 void fnAPP_Process_Events ( void ) {
 
-	// Processa RTC e eventos de Mag
+	// Processa timers e a maquina de estados a cada segundo
 	current_seconds = RtcGetCalendarTime(&miliseconds);
 	if (current_seconds != previous_seconds){
 		previous_seconds = current_seconds;
+
+		// processa os timers
 		fnAPP_Process_Event_RTC();
+
+		// processa a maquina de estados
+		fnAPP_STATE_Machine( EVENT_NONE );
 	}
 	return;
 

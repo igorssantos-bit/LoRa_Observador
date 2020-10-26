@@ -28,6 +28,8 @@ typedef enum {
    EVENT_INACTIVITY_TRIGGER,
    EVENT_CONFIRMATION_TRIGGER,
 
+	EVENT_NONE,
+
 } en_event_t;
 
 

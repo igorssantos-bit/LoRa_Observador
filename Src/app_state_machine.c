@@ -414,7 +414,6 @@ uint8_t fnAPP_STATE_Run ( uint8_t event ) {
 
 	check_day_event_return = fnAPP_STATE_Check_Day_Event ( APP_STATE_BLE_TX );
 
-	// todo: verificar necessidade
 	if (check_day_event_return == APP_STATE_BLE_TX){
 		return fnAPP_STATE_Check_Config_Report_Event ( APP_STATE_BLE_TX);
 	}
@@ -429,9 +428,6 @@ uint8_t fnAPP_STATE_BLE_TX ( uint8_t event ){
 	if(f_config == 1){
 		printf("[H:2,%02X,%02X,%04X]\r\n", st_system_status.u8_op_code,
 				st_system_status.u8_janela_BLE, st_system_status.u16_timeOut_BLE);
-//		fnDEBUG_8bit_Hex(",", st_system_status.u8_op_code, "");
-//		fnDEBUG_8bit_Hex(",", st_system_status.u8_janela_BLE, "");
-//		fnDEBUG_16bit_Hex(",", st_system_status.u16_timeOut_BLE, "]\r\n");
 		f_config = 0;
 	}
 
@@ -445,10 +441,9 @@ uint8_t fnAPP_STATE_BLE_RX ( uint8_t event ){
 	// [  H	 :  1  ,  1  F  :  0  0  0  1  ,  2  0  :  0  0  0  1  ,  2  0  :  0  0  0  1  ]
 
 	uint8_t valid_flag = 0;
-	while(valid_flag == 0){
+	do{
 		// habilita a interrupção de leitura
-		HAL_UART_Receive_IT(&huart1, buffer_rx, 50);
-		RtcDelayMs(1000);
+		HAL_UART_Receive(&huart1, buffer_rx, 50, 500);
 
 		// caso não achar o cabeçalho desejado, reinicia
 		uint8_t header1[] = "[H:1";
@@ -465,7 +460,7 @@ uint8_t fnAPP_STATE_BLE_RX ( uint8_t event ){
 			valid_flag = 1;
 		}
 
-	}
+	} while(valid_flag == 0);
 
 	// Dorme o BLE pelo Pino PA8
 	HAL_GPIO_WritePin(WKUP_BLE_GPIO_Port, WKUP_BLE, GPIO_PIN_RESET);
@@ -475,7 +470,7 @@ uint8_t fnAPP_STATE_BLE_RX ( uint8_t event ){
 
 uint8_t fnAPP_STATE_Send_BLE_Data ( uint8_t event ){
 
-
+	printf("fake uplink\r\n");
 
 	// estruturar esse frame
 	//fnCOMM_SIGMAIS_Send_Frame_Tabela();
@@ -486,7 +481,7 @@ uint8_t fnAPP_STATE_Send_BLE_Data ( uint8_t event ){
 uint8_t fnAPP_STATE_Wait_Transmission ( uint8_t event ) {
 
 	counterState++;
-	if (counterState > 15)
+	if (counterState > 2)
 		return APP_STATE_RUN;
 
 	return APP_STATE_WAIT_TRANSMISSION;

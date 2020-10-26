@@ -244,7 +244,7 @@ int ProjectMain( void )
 	GetDeviceSN();
 	LmHandlerInit( &LmHandlerCallbacks, &LmHandlerParams );
 	LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams );
-	LmHandlerJoin( );
+	LmHandlerJoin();
 
 	fnAPP_Init();
 
@@ -263,9 +263,8 @@ int ProjectMain( void )
 		case LORA_IDLE:{
 			if (!LmHandlerIsBusy()){
 				if (st_system_status.u8_state_machine_state == APP_STATE_WAIT_TRANSMISSION){
-					printf("era pra dormir aqui \r\n");
-					//LpmEnterStopMode();
-					//LpmExitStopMode();
+//					LpmEnterStopMode();
+//					LpmExitStopMode();
 				}
 			}
 		}
