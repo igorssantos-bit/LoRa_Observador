@@ -200,18 +200,9 @@ void RtcInit( void )
 		// Alarm.
 		HAL_RTC_DeactivateAlarm( &RtcHandle, RTC_ALARM_A );
 
-		/* ## Setting the Wake up time ############################################*/
-		/*  RTC Wakeup Interrupt Generation:
-        Wakeup Time Base = (RTC_WAKEUPCLOCK_RTCCLK_DIV /(LSE or LSI))
-        Wakeup Time = Wakeup Time Base * WakeUpCounter
-        = (RTC_WAKEUPCLOCK_RTCCLK_DIV /(LSE or LSI)) * WakeUpCounter
-        ==> WakeUpCounter = Wakeup Time / Wakeup Time Base
-
-        RTC_WAKEUPCLOCK_RTCCLK_DIV = RTCCLK_Div16 = 16
-        Wakeup Time Base = 16 /(~32.768KHz) = ~0,488ms
-        Wakeup Time = ~500ms = 0,488ms * WakeUpCounter
-        ==> WakeUpCounter = ~500ms/0,488ms = 1024 = 0x400 */
-		HAL_RTCEx_SetWakeUpTimer_IT(&RtcHandle, 0x400, RTC_WAKEUPCLOCK_RTCCLK_DIV16);
+		/* ################## Setting the Wake up time ############################## */
+		/* Caso ck_spre for ajustado para 1Hz cada unidade do contador equivale a 1s. */
+		HAL_RTCEx_SetWakeUpTimer_IT(&RtcHandle, 60, RTC_WAKEUPCLOCK_CK_SPRE_16BITS);
 
 		// Enable IRQ
 		HAL_NVIC_SetPriority( RTC_IRQn, 0, 0 );

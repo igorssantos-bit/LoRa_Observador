@@ -234,18 +234,18 @@ uint32_t timeOutMacBusy = 0;
  */
 int ProjectMain( void )
 {
-
+	// Inicialização da placa e dos periféricos
 	BoardInitMcu();
-
 	RtcInit();
-
 	RtcDelayMs(3000);
 
+	// Inicialização da rede LoRa
 	GetDeviceSN();
 	LmHandlerInit( &LmHandlerCallbacks, &LmHandlerParams );
 	LmHandlerPackageRegister( PACKAGE_ID_COMPLIANCE, &LmhpComplianceParams );
 	LmHandlerJoin();
 
+	// Inicia os processos utilizados na placa
 	fnAPP_Init();
 
 	IsMacProcessPending = 0;
@@ -254,7 +254,6 @@ int ProjectMain( void )
 	{
 
 		LmHandlerProcess( );
-
 		fnAPP_Process_Events();
 
 		switch (IsMacProcessPending){
@@ -263,8 +262,8 @@ int ProjectMain( void )
 		case LORA_IDLE:{
 			if (!LmHandlerIsBusy()){
 				if (st_system_status.u8_state_machine_state == APP_STATE_WAIT_TRANSMISSION){
-//					LpmEnterStopMode();
-//					LpmExitStopMode();
+					LpmEnterStopMode();
+					LpmExitStopMode();
 				}
 			}
 		}
