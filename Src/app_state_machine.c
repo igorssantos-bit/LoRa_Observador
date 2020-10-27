@@ -150,7 +150,7 @@ st_timer_index_t st_timer_confirm_detection;
 st_timer_index_t st_timer_periodic_transmission;
 uint8_t u8_detection_transmit_counter;
 
-uint8_t f_config = 1;
+uint8_t f_config;
 uint8_t num_Groups;
 uint8_t buffer_rx[MAX_GROUPS*8+5];
 uint16_t size_buffer;
@@ -178,7 +178,6 @@ void fnAPP_STATE_MACHINE_Init ( void ) {
 
 	st_app_state_machine_desc.pst_functions = (st_state_machine_functions_t*)&st_app_state_machine_functions[0];
 	fnSTATE_Machine_Init( &st_app_state_machine_desc );
-	fnCOMM_SIGMAIS_Donwlink_Frame_Set_Callback ( fnAPP_STATE_System_Reconfiguration );
 	st_sigfox_events.u16_all_flags = 0;
 	return;
 
@@ -199,61 +198,36 @@ void fnAPP_STATE_Machine ( en_event_t event ) {
 
 void fnAPP_STATE_ENTER_Init ( void ) {
 	st_system_status.u8_state_machine_state = APP_STATE_INIT;
-	print_device_data();
-	printDevEUI();
-	printDevAddr();
 
 	return;
 }
 
 void fnAPP_STATE_ENTER_Check_Config ( void ) {
-
 	printf("fnAPP_Check_Config\r\n");
 	st_system_status.u8_state_machine_state = APP_STATE_CHECK_CONFIG;
-	HAL_Init( );
+
 	HAL_RCC_DeInit();
 	SystemClockConfig_HighSpeed();
-	//fltTime = AJUSTE_TIMER_CLOCK_RAPIDO;
 	for (uint16_t atraso= 0; atraso < 15000; atraso++){
 		__ASM volatile ("nop");
 	}
 
 	BoardDeInitPeriph();
 	BoardInitPeriph();
+
 	counterState = 0;
 	timerTxSeconds = fnTIMESTAMP_Get_Timestamp_Counter_Seconds();
-	fnCOMM_SIGMAIS_Send_Config_Report_Frame ( );
+	fnCOMM_SIGMAIS_Request_Downlink_Frame();
 
-	fnTIMER_Start( &st_timer_check_config_timeout,
-			MS_TO_TICKS( 120000 ),
-			TIMER_TYPE_CONTINUOUS,
-			fnAPP_STATE_State_Timeout,
-			NULL );
-
-	u8_config_report_transmition_counter = 1;
+	u8_configuration_transmition_counter = 1;
+	f_config = 0;
 
 	return;
 }
 
 void fnAPP_STATE_ENTER_Configuration ( void ) {
-
 	st_system_status.u8_state_machine_state = APP_STATE_CONFIGURATION;
 	printf("fnAPP_Configuration\r\n");
-
-	HAL_RCC_DeInit();
-	SystemClockConfig_HighSpeed();
-	for (uint16_t atraso= 0; atraso < 15000; atraso++){
-		__ASM volatile ("nop");
-	}
-
-	BoardDeInitPeriph();
-	BoardInitPeriph();
-
-	counterState = 0;
-	timerTxSeconds = fnTIMESTAMP_Get_Timestamp_Counter_Seconds();
-	fnCOMM_SIGMAIS_Request_Downlink_Frame ( );
-
-	u8_configuration_transmition_counter = 1;
 
 	return;
 }
@@ -262,8 +236,6 @@ void fnAPP_STATE_ENTER_Configuration ( void ) {
 void fnAPP_STATE_ENTER_Run ( void ) {
 	printf("fnAPP_Run\r\n");
 	st_system_status.u8_state_machine_state = APP_STATE_RUN;
-
-	fnTIMESTAMP_Start_Horimetro( EN_IDLE_TIME );
 
 	return;
 }
@@ -305,10 +277,13 @@ void fnAPP_STATE_ENTER_Wait_Transmission ( void ){
 
 
 uint8_t fnAPP_STATE_Init ( uint8_t event ) {
-	en_next_app_state = APP_STATE_RUN;
 
-	//return APP_STATE_CHECK_CONFIG;
-	return APP_STATE_RUN;
+	print_device_data();
+	printDevEUI();
+	printDevAddr();
+
+	return APP_STATE_CHECK_CONFIG;
+	//return APP_STATE_RUN;
 }
 
 uint8_t fnAPP_STATE_Check_Config ( uint8_t event ) {
@@ -316,15 +291,11 @@ uint8_t fnAPP_STATE_Check_Config ( uint8_t event ) {
 	if( st_sigfox_events.flag.b_downlink_error ) {
 
 		st_sigfox_events.flag.b_downlink_error = false;
-		//if (!LoRaMacIsBusy()){
-		if( u8_config_report_transmition_counter <= 1 ) {
-			fnCOMM_SIGMAIS_Send_Config_Report_Frame ( );
-			u8_config_report_transmition_counter++;
-		} else {
-			fnCOMM_SIGMAIS_Send_Error_Frame ( EN_SIGMAIS_ERROR_RECEIVE, EN_SIGMAIS_SERVER_RESPONSE );
-			b_next_state = true;
+
+		if( u8_configuration_transmition_counter <= 1 ) {
+			fnCOMM_SIGMAIS_Request_Downlink_Frame();
+			u8_configuration_transmition_counter++;
 		}
-		//}
 	}
 
 	counterState++;
@@ -333,30 +304,20 @@ uint8_t fnAPP_STATE_Check_Config ( uint8_t event ) {
 	}
 
 	if( st_sigfox_events.flag.b_downlink_frame_received ) {
-		fnDEBUG_Const_String("donwlink frame recebido\r\n");
+		printf("donwlink frame recebido\r\n");
 		st_sigfox_events.flag.b_downlink_frame_received = false;
+
+		// calib pend op_code frame_type
+		//     0 	0     111        001
+		// Config frame = 39 05 3C 00 3C 00
 		fnCOMM_SIGMAIS_Decode_Downlink_Frame ( au8_downlink_frame );
-
-		if( st_sigfox_events.flag.b_daily_update_received ) {
-			fnDEBUG_Const_String("daily frame recebido\r\n");
-			st_sigfox_events.flag.b_daily_update_received = false;
-			if( st_system_status.b_configuration_pending ) {
-				return APP_STATE_CONFIGURATION;
-			}
-			else {
-				b_next_state = true;
-			}
-		}
-		else{
-			// ocorreu um erro no downlink
-			return APP_STATE_RUN;
-		}
-
 	}
 
-	if( b_next_state == true ) {
-		b_next_state = false;
-		return en_next_app_state;
+	if( st_sigfox_events.flag.b_config_frame_received ) {
+		printf("config frame recebido\r\n");
+		st_sigfox_events.flag.b_config_frame_received = false;
+
+		return APP_STATE_CONFIGURATION;
 	}
 
 	return APP_STATE_CHECK_CONFIG;
@@ -365,58 +326,23 @@ uint8_t fnAPP_STATE_Check_Config ( uint8_t event ) {
 
 uint8_t fnAPP_STATE_Configuration ( uint8_t event ) {
 
-	if( st_sigfox_events.flag.b_downlink_error ) {
-
-		st_sigfox_events.flag.b_downlink_error = false;
-
-		if( u8_configuration_transmition_counter <= 1 ) {
-			fnCOMM_SIGMAIS_Request_Downlink_Frame ( );
-			u8_configuration_transmition_counter++;
-		} else {
-			fnCOMM_SIGMAIS_Send_Error_Frame ( EN_SIGMAIS_ERROR_RECEIVE, EN_SIGMAIS_SERVER_RESPONSE );
-			b_next_state = true;
-		}
+	// fazer switch case aqui dps
+	if ( st_system_status.u8_op_code == EN_SIGMAIS_OP_CODE_ALL ){
+		num_Groups = MAX_GROUPS;
 	}
 
-	counterState++;
-	if (counterState > 50){
-		return APP_STATE_RUN;
-	}
+	f_config = 1;
 
-	if( st_sigfox_events.flag.b_downlink_frame_received ) {
-		fnDEBUG_Const_String("donwlink frame recebido\r\n");
-		st_sigfox_events.flag.b_downlink_frame_received = false;
-		fnCOMM_SIGMAIS_Decode_Downlink_Frame ( au8_downlink_frame );
-	}
 
-	if( st_sigfox_events.flag.b_config_frame_received ) {
-		fnDEBUG_Const_String("config frame recebido\r\n");
-		st_sigfox_events.flag.b_config_frame_received = false;
-		fnSENSORS_Config ( );
-
-		// configurar o lora aqui
-		f_config =1;
-
-		b_next_state = true;
-	}
-
-	if( b_next_state == true ) {
-		b_next_state = false;
-		return en_next_app_state;
-	}
-
-	return APP_STATE_CONFIGURATION;
+	return APP_STATE_RUN;
 }
 
 
 uint8_t fnAPP_STATE_Run ( uint8_t event ) {
 	en_app_state_t  check_day_event_return;
 
+	// Chega se no presente dia o dispositivo ja fez check config
 	check_day_event_return = fnAPP_STATE_Check_Day_Event ( APP_STATE_BLE_TX );
-
-	if (check_day_event_return == APP_STATE_BLE_TX){
-		return fnAPP_STATE_Check_Config_Report_Event ( APP_STATE_BLE_TX);
-	}
 
 	return check_day_event_return;
 }
@@ -470,10 +396,7 @@ uint8_t fnAPP_STATE_BLE_RX ( uint8_t event ){
 
 uint8_t fnAPP_STATE_Send_BLE_Data ( uint8_t event ){
 
-	printf("fake uplink\r\n");
-
-	// estruturar esse frame
-	//fnCOMM_SIGMAIS_Send_Frame_Tabela();
+	fnCOMM_SIGMAIS_Send_Frame_Tabela();
 
 	return APP_STATE_WAIT_TRANSMISSION;
 }
@@ -481,7 +404,7 @@ uint8_t fnAPP_STATE_Send_BLE_Data ( uint8_t event ){
 uint8_t fnAPP_STATE_Wait_Transmission ( uint8_t event ) {
 
 	counterState++;
-	if (counterState > 2)
+	if (counterState > 10)
 		return APP_STATE_RUN;
 
 	return APP_STATE_WAIT_TRANSMISSION;
@@ -563,8 +486,6 @@ void fnAPP_STATE_System_Reconfiguration ( en_sigmais_downlink_frame_type_t en_si
 	if( en_sigmais_downlink_frame_type == EN_SIGMAIS_DOWNLINK_DAILY_UPDATE ) {
 		st_sigfox_events.flag.b_daily_update_received = true;
 	} else if( en_sigmais_downlink_frame_type == EN_SIGMAIS_DOWNLINK_CONFIG_FRAME ) {
-		st_sigfox_events.flag.b_config_frame_received = true;
-	} else if( en_sigmais_downlink_frame_type == EN_SIGMAIS_DOWNLINK_CONFIG_PARK_PARAMETERS ) {
 		st_sigfox_events.flag.b_config_frame_received = true;
 	}
 
@@ -675,57 +596,6 @@ void fnSTATE_MACHINE_On_State_Changed( st_state_machine_desc_t * pst_desc ) {
 
    }
 	 */
-	return;
-}
-
-void fnSTATE_MACHINE_Periodic_Transmission( st_state_machine_desc_t * pst_desc ) {
-
-	if (st_system_status.b_downlink_config_frame_received){
-		st_system_status.b_downlink_config_frame_received = false;
-
-		if (st_timer_periodic_transmission.b_busy){
-			fnTIMER_Stop( st_timer_periodic_transmission.u8_index );
-		}
-	}
-
-	if (!st_system_status.b_data_processed ){
-		if( (pst_desc->current_state == APP_STATE_RUN ) || (pst_desc->current_state == APP_STATE_CONFIGURATION) ){
-
-			if( !st_timer_periodic_transmission.b_busy ) {
-				//    fnTIMER_Stop( st_timer_periodic_transmission.u8_index );
-				// }
-
-				fnDEBUG_Const_String("PERIODICO TIMER START\r\n");
-				fnTIMER_Start( &st_timer_periodic_transmission,
-						MS_TO_TICKS( fnTIMESTAMP_Covert_Time_Bitfield_Into_Secs(  (st_sigmais_time_byte_bitfield_t *) &st_system_status.st_sigmais_transmission_timer ) * 1000 ),
-						TIMER_TYPE_CONTINUOUS,
-						fnSTATE_MACHINE_Info_Frame_Horimetro,
-						NULL );
-			}
-		}
-	}
-	else{
-		if (st_timer_periodic_transmission.b_busy){
-			fnTIMER_Stop( st_timer_periodic_transmission.u8_index );
-		}
-	}
-
-
-
-	return;
-}
-
-
-void fnSTATE_MACHINE_Info_Frame_Horimetro( void * pv_null ) {
-
-	//fnCOMM_SIGMAIS_Send_Info_Frame_Horimetro_Raw_Data();
-	if (first_package_of_day){
-		first_package_of_day = false;
-		fnCOMM_SIGMAIS_Send_Info_Frame_Horimetro();
-	}
-	else{
-		fnCOMM_SIF_Send_Horimetro_Pulsimetro();
-	}
 	return;
 }
 

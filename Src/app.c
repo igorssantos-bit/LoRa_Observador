@@ -106,8 +106,6 @@ void fnAPP_Init ( void ) {
 	// restore memory data
 	restoreData();
 
-	fnSENSORS_Init();
-
 	un_system_flags.flag.fxos_1_int_threshold = false;
 
 	st_system_status.b_probe1_enabled = false;

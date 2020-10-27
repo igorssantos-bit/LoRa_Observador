@@ -98,7 +98,7 @@ void fnSTATE_Machine_Update ( st_state_machine_desc_t * pst_desc, uint8_t next_s
    }
    
    fnSTATE_MACHINE_On_State_Changed( pst_desc );
-   fnSTATE_MACHINE_Periodic_Transmission(pst_desc);
+   //fnSTATE_MACHINE_Periodic_Transmission(pst_desc);
 
    return;
 
