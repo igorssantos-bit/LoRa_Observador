@@ -661,15 +661,15 @@ HAL_StatusTypeDef HAL_UART_DeInit(UART_HandleTypeDef *huart)
   * @param huart UART handle.
   * @retval None
   */
-__weak void HAL_UART_MspInit(UART_HandleTypeDef *huart)
-{
-  /* Prevent unused argument(s) compilation warning */
-  UNUSED(huart);
-
-  /* NOTE : This function should not be modified, when the callback is needed,
-            the HAL_UART_MspInit can be implemented in the user file
-   */
-}
+//__weak void HAL_UART_MspInit(UART_HandleTypeDef *huart)
+//{
+//  /* Prevent unused argument(s) compilation warning */
+//  UNUSED(huart);
+//
+//  /* NOTE : This function should not be modified, when the callback is needed,
+//            the HAL_UART_MspInit can be implemented in the user file
+//   */
+//}
 
 /**
   * @brief DeInitialize the UART MSP.
