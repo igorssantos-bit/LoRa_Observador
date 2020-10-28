@@ -306,17 +306,6 @@ uint8_t fnAPP_STATE_Check_Config ( uint8_t event ) {
 	if( st_sigfox_events.flag.b_downlink_frame_received ) {
 		printf("donwlink frame recebido\r\n");
 		st_sigfox_events.flag.b_downlink_frame_received = false;
-
-		// calib pend op_code frame_type
-		//     0 	0     111        001
-		// Config frame = 39 05 3C 00 3C 00
-		fnCOMM_SIGMAIS_Decode_Downlink_Frame ( au8_downlink_frame );
-	}
-
-	if( st_sigfox_events.flag.b_config_frame_received ) {
-		printf("config frame recebido\r\n");
-		st_sigfox_events.flag.b_config_frame_received = false;
-
 		return APP_STATE_CONFIGURATION;
 	}
 
@@ -325,6 +314,24 @@ uint8_t fnAPP_STATE_Check_Config ( uint8_t event ) {
 }
 
 uint8_t fnAPP_STATE_Configuration ( uint8_t event ) {
+
+	/*
+	 * Cabeçalho (1 byte):
+	 * calib 	pend 	op_code 	frame_type
+	 * 0b 		0b   	111b     001b			=>  0x39
+	 *
+	 * Corpo (5 bytes):
+	 * jan_BLE		tout_BLE		tim_Uplink
+	 * 0x05			0x3C00		0x3C00
+	 *
+	 * Payload completo: 0x39053C003C00
+	 */
+	fnCOMM_SIGMAIS_Decode_Downlink_Frame ( au8_downlink_frame );
+
+	if( st_sigfox_events.flag.b_config_frame_received ) {
+		printf("config frame recebido\r\n");
+		st_sigfox_events.flag.b_config_frame_received = false;
+	}
 
 	// fazer switch case aqui dps
 	if ( st_system_status.u8_op_code == EN_SIGMAIS_OP_CODE_ALL ){

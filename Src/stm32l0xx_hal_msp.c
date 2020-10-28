@@ -307,13 +307,13 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
     /**USART1 GPIO Configuration    
     PA10     ------> USART1_RX
     PA9     ------> USART1_TX 
-    */
+     */
     /**USART1 GPIO Configuration
-      PB6     ------> USART1_TX
-      PB7     ------> USART1_RX
-      */
-    //GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_9;    // PA9 e PA10
-    GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7;       // PB6 e PB7
+	PB6     ------> USART1_TX
+	PB7     ------> USART1_RX
+     */
+    GPIO_InitStruct.Pin = GPIO_PIN_10|GPIO_PIN_9;    // PA9 e PA10
+    //GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7;       // PB6 e PB7
     GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
