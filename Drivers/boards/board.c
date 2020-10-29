@@ -448,8 +448,8 @@ void SystemClockConfig_MSI( void )
 	//      no Range 2 o consumo foi para 230uA
 #if 1
 	RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
-	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_MSI; //RCC_SYSCLKSOURCE_HSI; //RCC_SYSCLKSOURCE_PLLCLK;
-	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV4;//RCC_SYSCLK_DIV8 -> no MSI da erro de sincronismo com o RTC
+	RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_MSI;
+	RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV4;
 	RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
 	RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 	//if( HAL_RCC_ClockConfig( &RCC_ClkInitStruct, FLASH_LATENCY_1 ) != HAL_OK )
@@ -461,12 +461,11 @@ void SystemClockConfig_MSI( void )
 
 	PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC | RCC_PERIPHCLK_USART1;
 	PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
-	PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_SYSCLK;//RCC_RTCCLKSOURCE_LSE;
+	PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_SYSCLK;
 	if( HAL_RCCEx_PeriphCLKConfig( &PeriphClkInit ) != HAL_OK )
 	{
 		assert_param( FAIL );
 	}
-
 
 	// Systick intitialize
 	//TODO: ENTENDER PQ A CONFIG ABAIXO GERA PROBLEMA
@@ -648,7 +647,7 @@ void MX_GPIO_Init(void)
 	HAL_GPIO_WritePin(WKUP_BLE_GPIO_Port,WKUP_BLE, GPIO_PIN_SET);
 
 	/* Configuração dos pinos não utilizados (NC) e pinos Analogicos */
-	GPIO_InitStruct.Pin =  EXTI0_XL_Pin | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_9| GPIO_PIN_10| GPIO_PIN_11;
+	GPIO_InitStruct.Pin =  EXTI0_XL_Pin | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_11;
 	GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -754,7 +753,7 @@ void MX_GPIO_DeInit(void){
 	__HAL_RCC_GPIOH_CLK_ENABLE();
 
 	/* A */
-	GPIO_InitStruct.Pin = EXTI0_XL_Pin | PA1_ANT_SW_RX_Pin | WKUP_BLE;
+	GPIO_InitStruct.Pin = EXTI0_XL_Pin | PA1_ANT_SW_RX_Pin | WKUP_BLE | GPIO_PIN_9 | GPIO_PIN_10;
 	GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
