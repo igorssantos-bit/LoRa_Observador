@@ -262,6 +262,7 @@ void fnAPP_STATE_ENTER_BLE_RX ( void ) {
 void fnAPP_STATE_ENTER_Send_BLE_Data ( void ) {
 	printf("fnAPP_BLE_Send_Data\r\n");
 	st_system_status.u8_state_machine_state = APP_STATE_SEND_BLE_DATA;
+	counterState = 0;
 	return;
 }
 
@@ -376,7 +377,7 @@ uint8_t fnAPP_STATE_BLE_RX ( uint8_t event ){
 	uint8_t valid_flag = 0;
 	do{
 		// habilita a interrupção de leitura
-		HAL_UART_Receive(&huart1, buffer_rx, 50, 500);
+		HAL_UART_Receive(&huart1, buffer_rx, 50, 1000);
 
 		// caso não achar o cabeçalho desejado, reinicia
 		uint8_t header1[] = "[H:1";
@@ -398,20 +399,24 @@ uint8_t fnAPP_STATE_BLE_RX ( uint8_t event ){
 	// Dorme o BLE pelo Pino PA8
 	HAL_GPIO_WritePin(WKUP_BLE_GPIO_Port, WKUP_BLE, GPIO_PIN_RESET);
 
+	fnCOMM_SIGMAIS_Send_Frame_Tabela();
+
 	return APP_STATE_SEND_BLE_DATA;
 }
 
 uint8_t fnAPP_STATE_Send_BLE_Data ( uint8_t event ){
 
-	fnCOMM_SIGMAIS_Send_Frame_Tabela();
+	counterState++;
+		if (counterState > 15)
+			return APP_STATE_WAIT_TRANSMISSION;
 
-	return APP_STATE_WAIT_TRANSMISSION;
+	return APP_STATE_SEND_BLE_DATA;
 }
 
 uint8_t fnAPP_STATE_Wait_Transmission ( uint8_t event ) {
 
 	counterState++;
-	if (counterState > 10)
+	if (counterState > 5)
 		return APP_STATE_RUN;
 
 	return APP_STATE_WAIT_TRANSMISSION;
