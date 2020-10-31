@@ -638,7 +638,7 @@ void MX_GPIO_Init(void)
 	HAL_GPIO_Init(PA1_ANT_SW_RX_Port, &GPIO_InitStruct);
 
 	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(WKUP_BLE_GPIO_Port,WKUP_BLE, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(WKUP_BLE_GPIO_Port,WKUP_BLE, GPIO_PIN_RESET);
 
 	/*Configure GPIO pins : WKUP_BLE */
 	GPIO_InitStruct.Pin = WKUP_BLE;

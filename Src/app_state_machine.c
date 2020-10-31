@@ -349,7 +349,7 @@ uint8_t fnAPP_STATE_Run ( uint8_t event ) {
 
 uint8_t fnAPP_STATE_BLE_TX ( uint8_t event ){
 	// Acorda o BLE pelo Pino PA8
-	HAL_GPIO_WritePin(WKUP_BLE_GPIO_Port, WKUP_BLE, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(WKUP_BLE_GPIO_Port, WKUP_BLE, GPIO_PIN_SET);
 
 	if(f_config == 1){
 		printf("[H:2,%02X,%02X,%04X]\r\n", st_system_status.u8_op_code,

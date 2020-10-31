@@ -263,11 +263,11 @@ int ProjectMain( void )
 			if (!LmHandlerIsBusy()){
 				if (st_system_status.u8_state_machine_state == APP_STATE_WAIT_TRANSMISSION){
 					printf("dorme\r\n");
-					HAL_Delay(100);
+					HAL_Delay(30);
 					LpmEnterStopMode();
 					LpmExitStopMode();
 					printf("acorda\r\n");
-					HAL_Delay(100);
+					HAL_Delay(30);
 					fnAPP_STATE_Machine( EVENT_WAKEUP );
 				}
 			}
