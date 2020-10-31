@@ -282,8 +282,8 @@ uint8_t fnAPP_STATE_Init ( uint8_t event ) {
 	printDevEUI();
 	printDevAddr();
 
-	return APP_STATE_CHECK_CONFIG;
-	//return APP_STATE_RUN;
+	//return APP_STATE_CHECK_CONFIG;
+	return APP_STATE_RUN;
 }
 
 uint8_t fnAPP_STATE_Check_Config ( uint8_t event ) {
@@ -403,9 +403,9 @@ uint8_t fnAPP_STATE_Send_BLE_Data ( uint8_t event ){
 
 uint8_t fnAPP_STATE_Wait_Transmission ( uint8_t event ) {
 
-	counterState++;
-	if (counterState > 10)
+	if( event == EVENT_WAKEUP ) {
 		return APP_STATE_RUN;
+	}
 
 	return APP_STATE_WAIT_TRANSMISSION;
 }

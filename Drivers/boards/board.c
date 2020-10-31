@@ -637,15 +637,15 @@ void MX_GPIO_Init(void)
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(PA1_ANT_SW_RX_Port, &GPIO_InitStruct);
 
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(WKUP_BLE_GPIO_Port,WKUP_BLE, GPIO_PIN_SET);
+
 	/*Configure GPIO pins : WKUP_BLE */
 	GPIO_InitStruct.Pin = WKUP_BLE;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	HAL_GPIO_Init(WKUP_BLE_GPIO_Port, &GPIO_InitStruct);
-
-	/*Configure GPIO pin Output Level */
-	HAL_GPIO_WritePin(WKUP_BLE_GPIO_Port,WKUP_BLE, GPIO_PIN_SET);
 
 	/* Configuração dos pinos não utilizados (NC) e pinos Analogicos */
 	GPIO_InitStruct.Pin =  EXTI0_XL_Pin | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3 | GPIO_PIN_9| GPIO_PIN_10| GPIO_PIN_11;
@@ -840,8 +840,8 @@ void MX_USART1_UART_Init(void)
 		Error_Handler();
 	}
 	__HAL_UART_ENABLE_IT(&huart1, UART_IT_RXNE);
-	HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
-	HAL_NVIC_EnableIRQ(USART1_IRQn);
+//	HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+//	HAL_NVIC_EnableIRQ(USART1_IRQn);
 	/* USER CODE END USART1_Init 1 */
 
 }

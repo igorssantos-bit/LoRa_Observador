@@ -29,6 +29,7 @@ typedef enum {
    EVENT_CONFIRMATION_TRIGGER,
 
 	EVENT_NONE,
+	EVENT_WAKEUP,
 
 } en_event_t;
 
